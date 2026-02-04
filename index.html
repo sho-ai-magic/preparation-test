@@ -141,17 +141,18 @@
         <!-- 右側: 時計 ＋ カウントダウン ＋ スタンプ -->
         <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-3 lg:gap-6 shrink-0 order-1 lg:order-2 h-full min-h-0">
             <!-- 1. デジタル時計 -->
-            <div id="clock-box" class="flex-[1.2] bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 border-blue-600/30">
+            <div id="clock-box" class="flex-[1] bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 border-blue-600/30">
                 <div id="digital-clock" class="text-4xl lg:text-7xl font-black drop-shadow-lg tracking-tight leading-none">00:00</div>
                 <div id="digital-seconds" class="text-lg lg:text-2xl font-bold opacity-90">00</div>
             </div>
 
             <!-- 2. 出発カウントダウン -->
-            <div id="countdown-card" class="flex-[1.5] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center border-t-[10px] border-orange-400 relative overflow-hidden min-w-0">
+            <div id="countdown-card" class="flex-[1] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center border-t-[10px] border-orange-400 relative overflow-hidden min-w-0">
                 <div class="w-full flex flex-col items-center text-center">
                     <div id="label-remaining" class="text-orange-500 font-black text-sm lg:text-2xl mb-2 lg:mb-4 uppercase tracking-widest leading-none">しゅっぱつまで</div>
-                    <div id="countdown-timer" class="text-xl md:text-2xl lg:text-4xl font-black text-gray-700 leading-tight flex flex-wrap justify-center items-center gap-2">
-                        あと -- 時間 -- 分 -- 秒
+                    <!-- whitespace-nowrap と tabular-nums でガタつきと折り返しを防止 -->
+                    <div id="countdown-timer" class="text-xl md:text-2xl lg:text-4xl font-black text-gray-700 leading-tight flex justify-center items-baseline gap-2 whitespace-nowrap tabular-nums">
+                        あと -- 時間 -- 分
                     </div>
                 </div>
             </div>
@@ -164,7 +165,8 @@
                         🏆 <span id="perfect-count">0</span>
                     </div>
                 </div>
-                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-1 lg:gap-3 px-1">
+                <!-- スタンプが収まるようにパディングと高さを調整 -->
+                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-1 lg:gap-3 px-1 min-h-0 overflow-hidden">
                     <!-- JSで生成 -->
                 </div>
             </div>
@@ -204,7 +206,7 @@
                 <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
                     <div id="label-departure-setting" class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-[0.2em] text-center">しゅっぱつ じかん</div>
                     <div class="flex justify-center">
-                        <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full max-w-[240px] p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl font-black text-center text-blue-600 outline-none shadow-sm">
+                        <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full max-w-[240px] p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl font-black text-center text-blue-600 focus:border-blue-400 outline-none shadow-sm">
                     </div>
                 </section>
                 <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
@@ -222,7 +224,7 @@
                 </section>
             </div>
             <div class="p-6 bg-slate-50 border-t flex justify-center shrink-0">
-                <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-16 py-3 rounded-full font-black text-xl shadow-lg active:scale-95">設定をおわる</button>
+                <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-16 py-3 rounded-full font-black text-xl shadow-lg hover:brightness-110 active:scale-95 transition-all">設定をおわる</button>
             </div>
         </div>
     </div>
@@ -423,12 +425,17 @@
         function updateCountdown(now) {
             const [depH, depM] = departureTime.split(':').map(Number); const target = new Date(now); target.setHours(depH, depM, 0, 0); if (target < now) target.setDate(target.getDate() + 1);
             const diff = target - now; const timerElement = document.getElementById('countdown-timer');
-            if (diff <= 0 || (target - now) < 1000) { timerElement.innerHTML = `<span class="text-red-500 animate-bounce">${t('alarm_time')}</span>`; } 
+            if (diff <= 0 || (target - now) < 1000) { 
+                timerElement.innerHTML = `<span class="text-red-500 animate-bounce">${t('alarm_time')}</span>`; 
+            } 
             else {
-                const totalSecs = Math.floor(diff / 1000); const h = Math.floor(totalSecs / 3600); const m = Math.floor((totalSecs % 3600) / 60); const s = totalSecs % 60;
+                const totalSecs = Math.floor(diff / 1000); 
+                const h = Math.floor(totalSecs / 3600); 
+                const m = Math.ceil((totalSecs % 3600) / 60); // 分を切り上げて表示
+                
                 let html = `<span class="text-[0.6em] mr-1 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
                 if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-0.5 font-black leading-none">${useKanji ? '時間':'じかん'}</span>`;
-                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 font-black leading-none">${useKanji ? '分':'ふん'}</span><span class="text-slate-400 font-bold leading-none">${s}</span><span class="text-[0.5em] mx-0.5 font-black text-slate-400 leading-none">${useKanji ? '秒':'びょう'}</span>`;
+                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 font-black leading-none">${useKanji ? '分':'ふん'}</span>`;
                 timerElement.innerHTML = html;
             }
         }
@@ -467,8 +474,8 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                div.className = `flex-1 flex flex-col items-center p-2 lg:p-3 rounded-lg lg:rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`;
-                div.innerHTML = `<span class="text-[8px] lg:text-xs font-black ${earned ? 'text-yellow-600' : 'text-gray-400'}">${daysLabels[d]}</span><span class="text-xl lg:text-3xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
+                div.className = `flex-1 flex flex-col items-center p-2 lg:p-3 rounded-lg lg:rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'} h-full justify-center`;
+                div.innerHTML = `<span class="text-[8px] lg:text-xs font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-xl lg:text-4xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
         }
