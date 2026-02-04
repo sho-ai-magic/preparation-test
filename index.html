@@ -15,10 +15,11 @@
             transition: background-color 0.3s ease;
         }
 
+        /* タスクカードの形をきれいに保つ */
         .card-container {
             perspective: 1000px;
             width: 100%;
-            aspect-ratio: 1.4 / 1;
+            aspect-ratio: 1.6 / 1;
             user-select: none;
             touch-action: none;
         }
@@ -45,7 +46,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 1.5rem;
+            border-radius: 1.25rem;
             border-width: 4px;
             box-shadow: 0 4px 10px -2px rgb(0 0 0 / 0.1);
         }
@@ -84,33 +85,35 @@
     <div class="flex flex-col lg:flex-row h-full gap-4 lg:gap-6">
         
         <!-- 左側：あさのじゅんび（メインエリア） -->
-        <div id="task-panel" class="flex-[2] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col border-b-[10px] border-blue-200 order-2 lg:order-1 overflow-hidden">
-            <div class="flex justify-between items-center mb-4 lg:mb-6 shrink-0">
+        <div id="task-panel" class="flex-[1.8] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col border-b-[10px] border-blue-200 order-2 lg:order-1 overflow-hidden">
+            <div class="flex justify-between items-center mb-3 lg:mb-4 shrink-0">
                 <div>
                     <h1 id="label-title" class="text-2xl lg:text-4xl font-black text-blue-600 leading-none">あさのじゅんび</h1>
                     <div class="flex items-center gap-2 lg:gap-4 mt-2">
-                        <div class="w-32 lg:w-64 h-3 lg:h-6 bg-gray-100 rounded-full overflow-hidden border-2 border-gray-50">
+                        <div class="w-32 lg:w-64 h-3 lg:h-5 bg-gray-100 rounded-full overflow-hidden border-2 border-gray-50">
                             <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
                         </div>
-                        <span id="progress-text" class="font-bold text-sm lg:text-xl text-gray-500">0 / 0</span>
+                        <span id="progress-text" class="font-bold text-xs lg:text-lg text-gray-400">0 / 0</span>
                     </div>
                 </div>
-                <button onclick="toggleSettings()" id="settings-btn" class="p-2 lg:p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <button onclick="toggleSettings()" id="settings-btn" class="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 </button>
             </div>
 
-            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-3 lg:gap-6 overflow-y-auto pb-4 pr-1 settings-scroll content-start"></div>
+            <!-- タスクの並び (高さを調整して見切れを防止) -->
+            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-3 lg:gap-4 overflow-y-auto pb-4 pr-1 settings-scroll content-start"></div>
 
-            <div class="mt-2 pt-3 border-t border-slate-50 flex flex-col lg:flex-row justify-between items-center gap-2 shrink-0">
-                <div id="add-task-form" class="flex gap-2 items-center w-full lg:w-auto">
-                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="flex-1 lg:w-48 px-3 py-2 border-2 border-slate-100 rounded-xl outline-none font-bold text-sm lg:text-base focus:border-blue-200 transition-colors">
-                    <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <!-- 操作エリア -->
+            <div class="mt-2 pt-2 border-t border-slate-50 flex justify-between items-center shrink-0">
+                <div id="add-task-form" class="flex gap-2 items-center">
+                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-32 lg:w-48 px-3 py-1.5 border-2 border-slate-100 rounded-xl outline-none font-bold text-xs lg:text-sm focus:border-blue-200">
+                    <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-1.5 rounded-xl active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
                 </div>
-                <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-xs lg:text-base transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-1 text-slate-300 hover:text-slate-500 font-bold text-[10px] lg:text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
                     <span id="label-reset">やりなおす</span>
                 </button>
             </div>
@@ -120,30 +123,30 @@
         <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-3 lg:gap-4 shrink-0 order-1 lg:order-2 h-full min-h-0">
             
             <!-- 1. 時計 -->
-            <div id="clock-box" class="flex-1 lg:flex-none lg:h-[25%] bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 border-blue-600/30">
-                <div id="digital-clock" class="text-4xl lg:text-7xl font-black drop-shadow-lg tracking-tight leading-none">00:00</div>
+            <div id="clock-box" class="flex-1 lg:flex-none lg:h-[22%] bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 flex flex-col items-center justify-center text-white border-b-8 border-blue-600/30">
+                <div id="digital-clock" class="text-5xl lg:text-7xl font-black drop-shadow-lg tracking-tight leading-none">00:00</div>
                 <div id="digital-seconds" class="text-lg lg:text-2xl font-bold opacity-80 mt-1">00</div>
             </div>
 
             <!-- 2. 出発カウントダウン -->
-            <div id="countdown-card" class="flex-1 lg:flex-none lg:h-[25%] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center border-t-[10px] border-orange-400 relative overflow-hidden min-w-0">
+            <div id="countdown-card" class="flex-1 lg:flex-none lg:h-[22%] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 flex flex-col items-center justify-center border-t-[10px] border-orange-400 relative overflow-hidden min-w-0">
                 <div class="w-full flex flex-col items-center text-center">
-                    <div id="label-remaining" class="text-orange-500 font-black text-xs lg:text-lg mb-2 uppercase tracking-widest leading-none">しゅっぱつまで</div>
-                    <div id="countdown-timer" class="text-xl md:text-3xl lg:text-5xl font-black text-slate-700 leading-none flex justify-center items-baseline gap-2 whitespace-nowrap tabular-nums">
+                    <div id="label-remaining" class="text-orange-500 font-black text-xs lg:text-base mb-2 uppercase tracking-widest leading-none">しゅっぱつまで</div>
+                    <div id="countdown-timer" class="text-2xl md:text-3xl lg:text-4xl font-black text-slate-700 leading-none flex justify-center items-baseline gap-2 whitespace-nowrap tabular-nums">
                         あと -- 時間 -- 分
                     </div>
                 </div>
             </div>
 
-            <!-- 3. スタンプカード (見切れを防止するためpaddingとgapを最適化) -->
-            <div id="stamp-card" class="flex-1 lg:flex-1 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-3 lg:p-5 flex flex-col justify-center border-t-[10px] border-yellow-400 relative overflow-hidden min-w-0">
-                <div class="flex justify-between items-center mb-2 lg:mb-4 px-1 shrink-0">
-                    <span id="label-stamp" class="text-[10px] lg:text-base font-black text-gray-400 uppercase tracking-wider">しゅうかんスタンプ</span>
+            <!-- 3. スタンプカード (縦に伸びすぎないよう高さを固定ぎみに) -->
+            <div id="stamp-card" class="flex-1 lg:flex-none lg:min-h-[140px] lg:max-h-[180px] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-5 flex flex-col justify-center border-t-[10px] border-yellow-400 relative overflow-hidden min-w-0">
+                <div class="flex justify-between items-center mb-3 px-1 shrink-0">
+                    <span id="label-stamp" class="text-[10px] lg:text-base font-black text-gray-400 uppercase tracking-wider">スタンプ</span>
                     <div class="flex items-center gap-1 text-yellow-500 font-black text-xs lg:text-xl">
                         🏆 <span id="perfect-count" class="tabular-nums">0</span>
                     </div>
                 </div>
-                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-0.5 lg:gap-2 px-0.5 min-h-0 overflow-hidden">
+                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-1 lg:gap-2 px-0.5 min-h-0 overflow-hidden">
                     <!-- JSで動的に生成 -->
                 </div>
             </div>
@@ -180,16 +183,16 @@
                     <div id="label-departure-setting" class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">しゅっぱつ じかん</div>
                     <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full max-w-[200px] p-3 bg-white border-2 border-slate-200 rounded-xl text-4xl font-black text-center text-blue-600 outline-none">
                 </section>
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                    <div id="label-stamp-days" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">スタンプをあつめる曜日</div>
-                    <div id="day-toggle-list" class="grid grid-cols-7 gap-1 lg:gap-2"></div>
+                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 text-center">
+                    <div id="label-stamp-days" class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">スタンプを集める曜日</div>
+                    <div id="day-toggle-list" class="flex flex-wrap justify-center gap-1"></div>
                 </section>
                 <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                    <div id="label-alarm-setting" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest text-xs">アラーム</div>
+                    <div id="label-alarm-setting" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">アラーム</div>
                     <div id="alarm-list" class="grid grid-cols-2 lg:grid-cols-3 gap-2"></div>
                 </section>
                 <section class="flex flex-col items-center pt-2">
-                    <button onclick="testSound()" class="bg-slate-800 text-white px-8 py-3 rounded-full font-black shadow-lg active:scale-95 transition-transform flex items-center gap-2">
+                    <button id="sound-test-btn" onclick="testSound()" class="bg-slate-800 text-white px-8 py-3 rounded-full font-black shadow-lg active:scale-95 transition-transform flex items-center gap-2">
                         <span id="label-sound-test">🔊 おとをならしてみる</span>
                     </button>
                 </section>
@@ -216,7 +219,7 @@
     <div id="alarm-overlay" class="fixed inset-0 z-[200] bg-orange-500 animate-pulse-theme hidden flex flex-col items-center justify-center text-white p-10 text-center">
         <div class="bg-white/20 rounded-full p-10 mb-8"><svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <h2 id="alarm-title" class="text-5xl lg:text-8xl font-black mb-8 tracking-tight">あと 10ふん！</h2>
-        <button onclick="closeAlarm()" id="btn-alarm-ok-box" class="bg-white text-orange-600 px-16 py-6 rounded-full text-3xl lg:text-5xl font-black shadow-2xl active:scale-95">わかった！</button>
+        <button onclick="closeAlarm()" id="btn-alarm-ok-box" class="bg-white text-orange-600 px-16 py-6 rounded-full text-3xl lg:text-5xl font-black shadow-2xl active:scale-95 transition-transform">わかった！</button>
     </div>
 
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-8 py-4 rounded-full font-bold shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 z-[250] text-sm lg:text-base text-center"></div>
@@ -226,7 +229,7 @@
             kanji: {
                 title: "朝の準備", remaining: "出発まで", stamp_card: "週間スタンプ", reset: "やりなおす",
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
-                departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "アラーム設定",
+                departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
                 sound_test: "🔊 音を鳴らしてみる", close_settings: "設定を終わる", done: "完了！",
                 celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
@@ -296,7 +299,7 @@
             renderDayToggles();
             renderStamps();
             startClock();
-            document.getElementById('new-task-input').addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
+            document.getElementById('new-task-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
             window.addEventListener('resize', renderTasks);
         };
 
@@ -315,7 +318,7 @@
         function applyTheme() {
             const config = THEMES[theme];
             document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-4 lg:p-6 text-slate-800 transition-colors duration-300`;
-            document.getElementById('clock-box').className = `flex-1 lg:flex-none lg:h-[25%] bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 ${config.clockBorder}`;
+            document.getElementById('clock-box').className = `flex-1 lg:flex-none lg:h-[22%] bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 ${config.clockBorder}`;
             document.getElementById('task-panel').className = `flex-1 min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col border-b-[10px] ${config.border}`;
             document.getElementById('label-title').className = `text-xl lg:text-4xl font-black ${config.text} lg:mb-2 leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} hover:${config.primaryDark} text-white p-2 rounded-xl transition-all active:scale-95`;
@@ -433,10 +436,11 @@
                     <div class="card-inner ${task.completed ? 'is-flipped' : ''}" onclick="toggleTask(${task.id})">
                         <div class="card-front bg-white ${config.border} ${config.text}">
                             <span class="text-sm lg:text-xl font-black px-1 text-center pointer-events-none break-all">${taskT(task.text)}</span>
+                            ${isSettingsMode ? `<button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-2 shadow-lg z-20"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : ''}
                         </div>
                         <div class="card-back bg-green-100 border-green-400 text-green-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            <span class="text-[10px] lg:text-base font-black">${t('done')}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="text-green-500 mb-2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span class="text-xs lg:text-xl font-black">${t('done')}</span>
                         </div>
                     </div>
                 `;
@@ -451,9 +455,9 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'} h-full justify-center min-w-0 transition-all duration-300 flex-shrink`;
+                div.className = `flex-1 flex flex-col items-center p-2 lg:p-2 rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-gray-50 border-gray-100'} h-[85%] justify-center min-w-0 transition-all duration-300 flex-shrink`;
                 div.innerHTML = `
-                    <span class="text-[8px] lg:text-xs font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span>
+                    <span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span>
                     <span class="text-2xl lg:text-5xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>
                 `;
                 container.appendChild(div);
@@ -465,7 +469,7 @@
             const daysLabels = t('days'); const config = THEMES[theme];
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 const active = enabledDays[d]; const btn = document.createElement('button');
-                btn.className = `p-2 rounded-xl text-[10px] lg:text-xs font-black border-2 transition-all ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
+                btn.className = `p-2 rounded-xl text-xs font-black border-2 transition-all ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
                 btn.textContent = daysLabels[d]; btn.onclick = () => { enabledDays[d] = !enabledDays[d]; renderDayToggles(); renderStamps(); saveToStorage(); };
                 container.appendChild(btn);
             });
@@ -486,7 +490,9 @@
 
         function updateProgress() {
             const completed = tasks.filter(t => t.completed).length; const total = tasks.length; const percent = total > 0 ? (completed / total) * 100 : 0;
-            document.getElementById('progress-bar').style.width = `${percent}%`; document.getElementById('progress-text').textContent = `${completed} / ${total}`;
+            const bar = document.getElementById('progress-bar');
+            if(bar) bar.style.width = `${percent}%`; 
+            safeUpdate('progress-text', `${completed} / ${total}`);
             if (total > 0 && completed === total && !isSettingsMode && !celebrationShownToday) { celebrationShownToday = true; handleCompletion(); }
         }
 
@@ -505,15 +511,15 @@
             else { title.textContent = t('go_out'); desc.textContent = t('go_out_desc'); box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-100 text-rose-600"; speakText(useKanji ? "いってらっしゃい！気をつけて行ってきてね！" : "いってらっしゃい！きをつけて いってきてね！"); }
             const container = document.getElementById('confetti-container'); container.innerHTML = '';
             for (let i = 0; i < 60; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw'; c.style.backgroundColor = ['#f472b6', '#fb7185', '#fbbf24', '#60a5fa', '#a78bfa'][Math.floor(Math.random() * 5)]; c.style.animationDelay = Math.random() * 3 + 's'; c.style.width = '10px'; c.style.height = '10px'; container.appendChild(c); }
-            overlay.classList.remove('hidden');
+            overlay?.classList.remove('hidden');
         }
 
-        function closeCelebration() { document.getElementById('celebration-overlay').classList.add('hidden'); }
+        function closeCelebration() { document.getElementById('celebration-overlay')?.classList.add('hidden'); }
         function toggleTask(id) { if (draggedItemIndex !== null) return; const task = tasks.find(t => t.id === id); if (task) { task.completed = !task.completed; if (!task.completed) celebrationShownToday = false; audioCtx.resume(); playBeep(task.completed ? 1100 : 440, 0.05); renderTasks(); saveToStorage(); } }
-        function addTask() { const input = document.getElementById('new-task-input'); const text = input.value.trim(); if (text) { tasks.push({ id: Date.now(), text, completed: false }); celebrationShownToday = false; input.value = ''; renderTasks(); saveToStorage(); } }
+        function addTask() { const input = document.getElementById('new-task-input'); const text = input?.value.trim(); if (text) { tasks.push({ id: Date.now(), text, completed: false }); celebrationShownToday = false; if(input) input.value = ''; renderTasks(); saveToStorage(); } }
         function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); renderTasks(); saveToStorage(); }
         function resetAll() { tasks = tasks.map(t => ({ ...t, completed: false })); renderTasks(); saveToStorage(); }
-        function updateDepartureTime() { departureTime = document.getElementById('departure-input').value; saveToStorage(); }
+        function updateDepartureTime() { departureTime = document.getElementById('departure-input')?.value || departureTime; saveToStorage(); }
         
         function toggleSettings() {
             isSettingsMode = !isSettingsMode;
@@ -521,16 +527,16 @@
             const btn = document.getElementById('settings-btn');
             const config = THEMES[theme];
             if (isSettingsMode) {
-                overlay.classList.remove('hidden');
-                btn.className = `p-2 lg:p-3 ${config.primary} text-white rounded-full transition-colors shadow-lg`;
+                overlay?.classList.remove('hidden');
+                if(btn) btn.className = `p-2 ${config.primary} text-white rounded-full transition-colors shadow-lg`;
             } else {
-                overlay.classList.add('hidden');
-                btn.className = `p-2 lg:p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors`;
+                overlay?.classList.add('hidden');
+                if(btn) btn.className = `p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors`;
             }
             renderTasks();
         }
 
-        function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none'); setTimeout(() => t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none'), 3000); }
+        function showToast(msg) { const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none'); setTimeout(() => t.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none'), 3000); }
     </script>
 </body>
 </html>
