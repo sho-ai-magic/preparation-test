@@ -105,70 +105,67 @@
 
     <div class="flex flex-col lg:flex-row h-full gap-4 lg:gap-6">
         
-        <!-- 左側メイン: タスク管理 ＋ スタンプカード -->
-        <div class="flex-[2] flex flex-col gap-4 lg:gap-6 min-h-0 order-2 lg:order-1">
-            <!-- 準備タスクパネル -->
-            <div id="task-panel" class="flex-1 min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col border-b-8 border-blue-200">
-                <div class="flex justify-between items-center lg:items-end mb-3 lg:mb-6 shrink-0">
-                    <div>
-                        <h1 id="label-title" class="text-xl lg:text-4xl font-black text-blue-600 lg:mb-2 leading-none">あさのじゅんび</h1>
-                        <div class="flex items-center gap-2 lg:gap-4 mt-1">
-                            <div class="w-24 lg:w-64 h-3 lg:h-6 bg-gray-100 rounded-full overflow-hidden border-2 border-gray-50">
-                                <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
-                            </div>
-                            <span id="progress-text" class="font-bold text-xs lg:text-xl text-gray-500">0 / 0</span>
+        <!-- 左側メイン: タスク管理 -->
+        <div id="task-panel" class="flex-[2] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col order-2 lg:order-1 border-b-[10px] border-blue-200">
+            <div class="flex justify-between items-center lg:items-end mb-3 lg:mb-6 shrink-0">
+                <div>
+                    <h1 id="label-title" class="text-xl lg:text-4xl font-black text-blue-600 lg:mb-2 leading-none">あさのじゅんび</h1>
+                    <div class="flex items-center gap-2 lg:gap-4 mt-1">
+                        <div class="w-24 lg:w-64 h-3 lg:h-6 bg-gray-100 rounded-full overflow-hidden border-2 border-gray-50">
+                            <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
                         </div>
+                        <span id="progress-text" class="font-bold text-xs lg:text-xl text-gray-500">0 / 0</span>
                     </div>
-                    <button onclick="toggleSettings()" id="settings-btn" class="p-2 lg:p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
                 </div>
-
-                <!-- タスクグリッド -->
-                <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-6 pb-2 overflow-hidden"></div>
-
-                <!-- 下部操作エリア -->
-                <div class="mt-2 lg:mt-4 flex flex-col lg:flex-row justify-between items-center gap-2 shrink-0">
-                    <div id="add-task-form" class="flex gap-2 items-center w-full lg:w-auto">
-                        <input type="text" id="new-task-input" placeholder="タスクをついか" class="flex-1 lg:w-48 px-3 py-1 lg:px-4 lg:py-2 border-2 border-gray-200 rounded-xl outline-none font-bold text-xs lg:text-base">
-                        <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-xl transition-all active:scale-95">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        </button>
-                    </div>
-                    <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-2 text-gray-400 hover:text-gray-600 font-bold text-[10px] lg:text-base transition-colors active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                        <span id="label-reset">やりなおす</span>
-                    </button>
-                </div>
+                <button onclick="toggleSettings()" id="settings-btn" class="p-2 lg:p-3 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
             </div>
 
-            <!-- スタンプカード（左側に移動） -->
-            <div id="stamp-card" class="h-20 lg:h-28 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-3 lg:p-4 flex flex-col justify-center border-t-8 lg:border-t-[10px] border-yellow-400 relative overflow-hidden shrink-0">
-                <div class="flex justify-between items-center mb-1 px-2">
-                    <span id="label-stamp" class="text-[10px] lg:text-xs font-black text-gray-400 uppercase tracking-wider">しゅうかんスタンプ</span>
-                    <div class="flex items-center gap-1 text-yellow-500 font-black text-xs lg:text-sm">
-                        🏆 <span id="perfect-count">0</span>
-                    </div>
+            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 lg:gap-6 pb-2 overflow-hidden"></div>
+
+            <div class="mt-2 lg:mt-4 flex flex-col lg:flex-row justify-between items-center gap-2 shrink-0">
+                <div id="add-task-form" class="flex gap-2 items-center w-full lg:w-auto">
+                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="flex-1 lg:w-48 px-3 py-1 lg:px-4 lg:py-2 border-2 border-gray-200 rounded-xl outline-none font-bold text-xs lg:text-base">
+                    <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-xl transition-all active:scale-95">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
                 </div>
-                <div id="stamp-row" class="flex justify-between gap-1 lg:gap-2 px-1"></div>
+                <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-2 text-gray-400 hover:text-gray-600 font-bold text-[10px] lg:text-base transition-colors active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    <span id="label-reset">やりなおす</span>
+                </button>
             </div>
         </div>
 
-        <!-- 右側: 時計 ＋ カウントダウン -->
-        <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-3 lg:gap-6 shrink-0 order-1 lg:order-2">
-            <!-- デジタル時計 -->
-            <div id="clock-box" class="flex-1 lg:flex-none bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col items-center justify-center text-white border-b-4 lg:border-b-8 border-blue-600/30">
+        <!-- 右側: 時計 ＋ カウントダウン ＋ スタンプ -->
+        <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-3 lg:gap-6 shrink-0 order-1 lg:order-2 h-full min-h-0">
+            <!-- 1. デジタル時計 -->
+            <div id="clock-box" class="flex-[1.2] bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 border-blue-600/30">
                 <div id="digital-clock" class="text-4xl lg:text-7xl font-black drop-shadow-lg tracking-tight leading-none">00:00</div>
                 <div id="digital-seconds" class="text-lg lg:text-2xl font-bold opacity-90">00</div>
             </div>
 
-            <!-- 出発カウントダウン -->
-            <div id="countdown-card" class="flex-1 lg:flex-1 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center border-t-8 lg:border-t-[12px] border-orange-400 relative overflow-hidden min-w-0">
+            <!-- 2. 出発カウントダウン -->
+            <div id="countdown-card" class="flex-[1.5] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center border-t-[10px] border-orange-400 relative overflow-hidden min-w-0">
                 <div class="w-full flex flex-col items-center text-center">
-                    <div id="label-remaining" class="text-orange-500 font-black text-sm lg:text-2xl mb-2 lg:mb-4 uppercase tracking-widest">しゅっぱつまで</div>
+                    <div id="label-remaining" class="text-orange-500 font-black text-sm lg:text-2xl mb-2 lg:mb-4 uppercase tracking-widest leading-none">しゅっぱつまで</div>
                     <div id="countdown-timer" class="text-xl md:text-2xl lg:text-4xl font-black text-gray-700 leading-tight flex flex-wrap justify-center items-center gap-2">
                         あと -- 時間 -- 分 -- 秒
                     </div>
+                </div>
+            </div>
+
+            <!-- 3. しゅうかんスタンプカード -->
+            <div id="stamp-card" class="flex-[1.5] bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col justify-center border-t-[10px] border-yellow-400 relative overflow-hidden min-w-0">
+                <div class="flex justify-between items-center mb-3 px-1 shrink-0">
+                    <span id="label-stamp" class="text-[10px] lg:text-sm font-black text-gray-400 uppercase tracking-wider">しゅうかんスタンプ</span>
+                    <div class="flex items-center gap-1 text-yellow-500 font-black text-sm lg:text-lg">
+                        🏆 <span id="perfect-count">0</span>
+                    </div>
+                </div>
+                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-1 lg:gap-3 px-1">
+                    <!-- JSで生成 -->
                 </div>
             </div>
         </div>
@@ -246,7 +243,7 @@
     <div id="alarm-overlay" class="fixed inset-0 z-[200] bg-orange-500 animate-pulse-theme hidden flex flex-col items-center justify-center text-white p-10 text-center">
         <div class="bg-white/20 rounded-full p-10 mb-8"><svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <h2 id="alarm-title" class="text-4xl lg:text-7xl font-black mb-4 tracking-tight">あと 10ふん！</h2>
-        <button onclick="closeAlarm()" id="btn-alarm-ok" class="bg-white text-orange-600 px-16 py-6 rounded-full text-3xl lg:text-5xl font-black shadow-2xl active:scale-95">わかった！</button>
+        <button onclick="closeAlarm()" id="btn-alarm-ok" class="bg-white text-orange-600 px-16 py-6 rounded-full text-3xl lg:text-5xl font-black shadow-2xl active:scale-95 transition-transform">わかった！</button>
     </div>
 
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full font-bold shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 z-[250] text-sm"></div>
@@ -340,8 +337,8 @@
         function applyTheme() {
             const config = THEMES[theme];
             document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-4 lg:p-6 text-slate-800 transition-colors duration-300`;
-            document.getElementById('clock-box').className = `flex-1 lg:flex-none bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-4 lg:border-b-8 ${config.clockBorder}`;
-            document.getElementById('task-panel').className = `flex-1 min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col border-b-8 ${config.border}`;
+            document.getElementById('clock-box').className = `flex-[1.2] bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-6 flex flex-col items-center justify-center text-white border-b-8 ${config.clockBorder}`;
+            document.getElementById('task-panel').className = `flex-1 min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-xl p-4 lg:p-8 flex flex-col border-b-[10px] ${config.border}`;
             document.getElementById('label-title').className = `text-xl lg:text-4xl font-black ${config.text} lg:mb-2 leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} hover:${config.primaryDark} text-white p-2 rounded-xl transition-all active:scale-95`;
             document.getElementById('close-settings-btn').className = `${config.primary} text-white px-16 py-3 rounded-full font-black text-xl shadow-lg hover:brightness-110 active:scale-95 transition-all`;
@@ -429,9 +426,9 @@
             if (diff <= 0 || (target - now) < 1000) { timerElement.innerHTML = `<span class="text-red-500 animate-bounce">${t('alarm_time')}</span>`; } 
             else {
                 const totalSecs = Math.floor(diff / 1000); const h = Math.floor(totalSecs / 3600); const m = Math.floor((totalSecs % 3600) / 60); const s = totalSecs % 60;
-                let html = `<span class="text-[0.6em] mr-1 opacity-50 font-black uppercase tracking-widest">あと</span>`;
-                if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-0.5 font-black">${useKanji ? '時間':'じかん'}</span>`;
-                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 font-black">${useKanji ? '分':'ふん'}</span><span class="text-slate-400 font-bold">${s}</span><span class="text-[0.5em] mx-0.5 font-black text-slate-400">${useKanji ? '秒':'びょう'}</span>`;
+                let html = `<span class="text-[0.6em] mr-1 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
+                if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-0.5 font-black leading-none">${useKanji ? '時間':'じかん'}</span>`;
+                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 font-black leading-none">${useKanji ? '分':'ふん'}</span><span class="text-slate-400 font-bold leading-none">${s}</span><span class="text-[0.5em] mx-0.5 font-black text-slate-400 leading-none">${useKanji ? '秒':'びょう'}</span>`;
                 timerElement.innerHTML = html;
             }
         }
@@ -470,8 +467,8 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                div.className = `flex-1 flex flex-col items-center p-1 rounded-lg border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`;
-                div.innerHTML = `<span class="text-[8px] lg:text-[10px] font-bold ${earned ? 'text-yellow-600' : 'text-gray-400'}">${daysLabels[d]}</span><span class="text-lg lg:text-2xl ${earned ? 'earned-stamp' : 'opacity-20 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
+                div.className = `flex-1 flex flex-col items-center p-2 lg:p-3 rounded-lg lg:rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'}`;
+                div.innerHTML = `<span class="text-[8px] lg:text-xs font-black ${earned ? 'text-yellow-600' : 'text-gray-400'}">${daysLabels[d]}</span><span class="text-xl lg:text-3xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
         }
