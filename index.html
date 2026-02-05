@@ -15,7 +15,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード：枠内に収まるよう比率を調整 */
+        /* 準備カード：比率を保ちつつGrid内で広がる */
         .card-container {
             perspective: 1000px;
             width: 100%;
@@ -77,90 +77,100 @@
         .earned-stamp { animation: shine 2s infinite; }
     </style>
 </head>
-<body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-4 lg:p-5 text-slate-800 transition-colors duration-300">
+<body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-3 lg:p-5 text-slate-800 transition-colors duration-300">
 
-    <div class="flex flex-col lg:flex-row h-full gap-4 lg:gap-5 overflow-hidden">
+    <!-- メインレイアウト：PC/タブレットは横、スマホは縦 -->
+    <div class="flex flex-col lg:flex-row h-full gap-3 lg:gap-5 overflow-hidden">
         
-        <!-- 左側：あさのじゅんび -->
-        <div id="task-panel" class="flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col order-2 lg:order-1 overflow-hidden p-5 lg:p-6 border border-slate-100">
-            <div class="flex justify-between items-center mb-3 shrink-0 px-2">
-                <div>
-                    <h1 id="label-title" class="text-2xl lg:text-4xl font-black text-blue-600 leading-none">あさのじゅんび</h1>
-                    <div class="flex items-center gap-3 mt-3">
-                        <div class="w-32 lg:w-64 h-3 lg:h-5 bg-slate-100 rounded-full overflow-hidden border">
-                            <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
-                        </div>
-                        <span id="progress-text" class="font-bold text-sm lg:text-xl text-slate-400">0 / 0</span>
-                    </div>
-                </div>
-                <button onclick="toggleSettings()" id="settings-btn" class="p-2 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                </button>
+        <!-- サイドバー：PC/タブレットは右側、スマホは上部 -->
+        <!-- スマホ時は横並びに、タブレット以上は縦に等割 -->
+        <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-2 lg:gap-5 shrink-0 order-1 lg:order-2 lg:h-full min-h-0 h-[22dvh] lg:h-full">
+            
+            <!-- 1. 時計 -->
+            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white shadow-sm transition-all overflow-hidden border-b-4 border-blue-600/10">
+                <div id="digital-clock" class="text-3xl lg:text-8xl font-black tracking-tight leading-none drop-shadow-md">00:00</div>
+                <div id="digital-seconds" class="text-xs lg:text-3xl font-bold opacity-80 mt-1 lg:mt-2 tabular-nums">00</div>
             </div>
 
-            <!-- タスクのグリッド -->
-            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-3 overflow-hidden content-stretch pb-1"></div>
-
-            <!-- 操作エリア -->
-            <div class="mt-2 pt-2 border-t border-slate-50 flex justify-between items-center shrink-0">
-                <div id="add-task-form" class="flex gap-2 items-center">
-                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-40 lg:w-64 px-4 py-2 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none font-bold text-sm focus:border-blue-200 transition-all">
-                    <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-2 rounded-xl active:scale-95 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    </button>
-                </div>
-                <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-2 text-slate-300 hover:text-slate-500 font-black text-xs transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-                    <span id="label-reset">やりなおす</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- 右側：時計・カウントダウン・スタンプ（3等分） -->
-        <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-4 lg:gap-5 shrink-0 order-1 lg:order-2 h-full min-h-0">
-            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[2.5rem] flex flex-col items-center justify-center text-white shadow-sm">
-                <div id="digital-clock" class="text-5xl lg:text-8xl font-black tracking-tight leading-none">00:00</div>
-                <div id="digital-seconds" class="text-xl lg:text-3xl font-bold opacity-80 mt-2 tabular-nums">00</div>
-            </div>
-            <div id="countdown-card" class="flex-1 bg-white rounded-[2.5rem] flex flex-col items-center justify-center border border-slate-100 shadow-sm overflow-hidden">
-                <div class="w-full flex flex-col items-center text-center">
-                    <div id="label-remaining" class="text-orange-500 font-black text-sm lg:text-xl mb-3 uppercase tracking-widest leading-none">しゅっぱつまで</div>
-                    <div id="countdown-timer" class="text-2xl md:text-3xl lg:text-5xl font-black text-slate-700 leading-none flex justify-center items-baseline gap-2 whitespace-nowrap tabular-nums">
+            <!-- 2. 出発カウントダウン -->
+            <div id="countdown-card" class="flex-1 bg-white rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center border border-slate-100 shadow-sm overflow-hidden">
+                <div class="w-full flex flex-col items-center text-center px-1">
+                    <div id="label-remaining" class="text-orange-500 font-black text-[10px] lg:text-xl mb-1 lg:mb-3 uppercase tracking-widest leading-none">しゅっぱつまで</div>
+                    <div id="countdown-timer" class="text-sm md:text-3xl lg:text-5xl font-black text-slate-700 leading-none flex justify-center items-baseline gap-1 lg:gap-2 whitespace-nowrap tabular-nums">
                         あと -- 時間 -- 分
                     </div>
                 </div>
             </div>
-            <div id="stamp-card" class="flex-1 bg-white rounded-[2.5rem] p-6 lg:p-8 flex flex-col justify-center border border-slate-100 shadow-sm overflow-hidden">
-                <div class="flex justify-between items-center mb-4 px-2">
-                    <span id="label-stamp" class="text-xs lg:text-lg font-black text-slate-400 uppercase tracking-wider">週間スタンプ</span>
-                    <div class="flex items-center gap-2 text-yellow-500 font-black text-sm lg:text-2xl">
+
+            <!-- 3. スタンプカード -->
+            <div id="stamp-card" class="flex-1 bg-white rounded-[1.5rem] lg:rounded-[2.5rem] p-2 lg:p-8 flex flex-col justify-center border border-slate-100 shadow-sm overflow-hidden">
+                <div class="flex justify-between items-center mb-1 lg:mb-4 px-2 shrink-0">
+                    <span id="label-stamp" class="text-[8px] lg:text-lg font-black text-slate-400 uppercase tracking-wider">週間スタンプ</span>
+                    <div class="flex items-center gap-1 text-yellow-500 font-black text-[10px] lg:text-2xl">
                         🏆 <span id="perfect-count" class="tabular-nums">0</span>
                     </div>
                 </div>
-                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-2 px-1 overflow-hidden"></div>
+                <div id="stamp-row" class="flex-1 flex justify-between items-center gap-0.5 lg:gap-4 px-1 min-h-0 overflow-hidden">
+                    <!-- JSで動的に生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- メイン：あさのじゅんび（PC/タブレットは左、スマホは下部） -->
+        <div id="task-panel" class="flex-[3] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-sm flex flex-col order-2 lg:order-1 overflow-hidden p-3 lg:p-8 border border-slate-50">
+            <div class="flex justify-between items-center mb-2 lg:mb-4 shrink-0 px-2">
+                <div>
+                    <h1 id="label-title" class="text-xl lg:text-4xl font-black text-blue-600 leading-none">あさのじゅんび</h1>
+                    <div class="flex items-center gap-2 lg:gap-4 mt-2">
+                        <div class="w-24 lg:w-64 h-2 lg:h-5 bg-slate-100 rounded-full overflow-hidden border">
+                            <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
+                        </div>
+                        <span id="progress-text" class="font-bold text-[10px] lg:text-xl text-slate-400">0 / 0</span>
+                    </div>
+                </div>
+                <button onclick="toggleSettings()" id="settings-btn" class="p-2 lg:p-3 bg-slate-50 text-slate-400 rounded-full hover:bg-slate-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 lg:w-7 lg:h-7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+            </div>
+
+            <!-- タスクのグリッド (1画面固定、スマホはスクロール可能にする) -->
+            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4 overflow-y-auto lg:overflow-hidden content-stretch pb-1 settings-scroll"></div>
+
+            <!-- 操作エリア -->
+            <div class="mt-2 pt-2 border-t border-slate-50 flex justify-between items-center shrink-0">
+                <div id="add-task-form" class="flex gap-2 items-center">
+                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-24 lg:w-64 px-3 py-1.5 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none font-bold text-[10px] lg:text-base focus:border-blue-200 transition-all">
+                    <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-1.5 rounded-xl active:scale-95 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="lg:w-5 lg:h-5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    </button>
+                </div>
+                <button id="reset-btn" onclick="resetAll()" class="flex items-center gap-1 text-slate-300 hover:text-slate-500 font-black text-[10px] lg:text-base transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="lg:w-4 lg:h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                    <span id="label-reset">やりなおす</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- 設定画面 -->
-    <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-5xl rounded-[3rem] shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-slate-100">
+    <!-- 設定画面 (2カラム・1画面構成) -->
+    <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-2 lg:p-4">
+        <div class="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[98vh] overflow-hidden border border-slate-100 text-slate-700">
             <!-- ヘッダー -->
-            <div class="px-10 py-6 border-b flex justify-between items-center shrink-0">
-                <h3 id="label-settings-title" class="text-3xl font-black text-slate-800 tracking-tight">せってい</h3>
+            <div class="px-6 lg:px-10 py-4 lg:py-6 border-b flex justify-between items-center shrink-0">
+                <h3 id="label-settings-title" class="text-2xl lg:text-3xl font-black tracking-tight">せってい</h3>
                 <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
             
-            <!-- 設定項目エリア (2カラム) -->
-            <div class="flex-1 overflow-y-auto p-10 grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-10 font-bold text-slate-700">
+            <!-- 設定項目エリア -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-10 grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 font-bold">
                 
                 <!-- 左セクション -->
-                <div class="space-y-10">
+                <div class="space-y-8">
                     <section>
-                        <h4 id="label-display-setting" class="text-2xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">ひょうじ せってい</h4>
-                        <div class="flex items-center justify-between px-2">
+                        <h4 id="label-display-setting" class="text-lg lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">ひょうじ せってい</h4>
+                        <div class="flex items-center justify-between px-2 py-2">
                             <span class="text-xl font-black">かんじ (漢字)</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="kanji-toggle" onchange="toggleKanji()" class="sr-only peer">
@@ -170,35 +180,33 @@
                     </section>
 
                     <section>
-                        <h4 id="label-theme-setting" class="text-2xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">テーマカラー</h4>
-                        <div class="grid grid-cols-4 gap-4 px-2">
-                            <button onclick="changeTheme('blue')" class="h-14 rounded-2xl bg-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('pink')" class="h-14 rounded-2xl bg-rose-400 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('green')" class="h-14 rounded-2xl bg-emerald-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('orange')" class="h-14 rounded-2xl bg-orange-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                        <h4 id="label-theme-setting" class="text-lg lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">テーマカラー</h4>
+                        <div class="grid grid-cols-4 gap-3 px-2">
+                            <button onclick="changeTheme('blue')" class="h-12 lg:h-14 rounded-2xl bg-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('pink')" class="h-12 lg:h-14 rounded-2xl bg-rose-400 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('green')" class="h-12 lg:h-14 rounded-2xl bg-emerald-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('orange')" class="h-12 lg:h-14 rounded-2xl bg-orange-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
                         </div>
                     </section>
 
                     <section>
-                        <h4 id="label-departure-setting" class="text-2xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
-                        <div class="flex items-center justify-between px-2">
+                        <h4 id="label-departure-setting" class="text-lg lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
+                        <div class="flex items-center justify-between px-2 py-2">
                             <span class="text-xl font-black">じかん (時間)</span>
-                            <!-- フォントサイズを拡大し横幅を確保 -->
-                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-52 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
+                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-48 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
                         </div>
                     </section>
                 </div>
 
                 <!-- 右セクション -->
-                <div class="space-y-10">
+                <div class="space-y-8">
                     <section>
-                        <h4 id="label-stamp-days" class="text-2xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
-                        <!-- 7列固定のグリッドで日曜日の折り返しを防止 -->
+                        <h4 id="label-stamp-days" class="text-lg lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
                         <div id="day-toggle-list" class="grid grid-cols-7 gap-2 px-2"></div>
                     </section>
 
                     <section>
-                        <h4 id="label-alarm-setting" class="text-2xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">アラーム</h4>
+                        <h4 id="label-alarm-setting" class="text-lg lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">アラーム</h4>
                         <div id="alarm-list" class="grid grid-cols-2 gap-3 px-2"></div>
                     </section>
                 </div>
@@ -206,25 +214,26 @@
         </div>
     </div>
 
-    <!-- オーバーレイ -->
+    <!-- お祝いオーバーレイ -->
     <div id="celebration-overlay" class="fixed inset-0 z-[100] bg-[#fff0f3]/95 hidden flex flex-col items-center justify-center text-rose-600 p-6 text-center overflow-hidden">
         <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
         <div class="relative z-10 flex flex-col items-center">
-            <div id="celebration-title-box" class="bg-white rounded-[4rem] p-10 lg:p-20 shadow-2xl mb-10 border-b-[12px] border-rose-50 text-rose-600">
-                <h2 id="main-celebration-title" class="text-4xl lg:text-7xl font-black mb-8 tracking-tighter whitespace-nowrap">じゅんび かんりょう！</h2>
-                <p id="main-celebration-desc" class="text-2xl lg:text-4xl font-bold opacity-90 leading-relaxed">すごい！ぜんぶ できたね！</p>
+            <div id="celebration-title-box" class="bg-white rounded-[3rem] p-8 lg:p-16 shadow-2xl mb-8 border-b-[12px] border-rose-50 text-rose-600">
+                <h2 id="main-celebration-title" class="text-4xl lg:text-7xl font-black mb-6 tracking-tighter whitespace-nowrap leading-none">じゅんび かんりょう！</h2>
+                <p id="main-celebration-desc" class="text-xl lg:text-3xl font-bold opacity-90 leading-relaxed">すごい！ぜんぶ できたね！</p>
             </div>
-            <button id="btn-celebration-ok" onclick="closeCelebration()" class="bg-rose-500 text-white px-24 py-6 rounded-full text-4xl lg:text-6xl font-black shadow-2xl active:scale-95 transition-transform">はーい！</button>
+            <button id="btn-celebration-ok" onclick="closeCelebration()" class="bg-rose-500 text-white px-20 py-5 rounded-full text-2xl lg:text-5xl font-black shadow-2xl active:scale-95 transition-transform">はーい！</button>
         </div>
     </div>
 
+    <!-- アラームオーバーレイ -->
     <div id="alarm-overlay" class="fixed inset-0 z-[200] bg-orange-500 hidden flex flex-col items-center justify-center text-white p-10 text-center animate-pulse">
-        <div class="bg-white/20 rounded-full p-10 mb-8"><svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <h2 id="alarm-title" class="text-6xl lg:text-9xl font-black mb-10 tracking-tight">あと 10ふん！</h2>
-        <button onclick="closeAlarm()" id="btn-alarm-ok-box" class="bg-white text-orange-600 px-24 py-8 rounded-full text-5xl lg:text-7xl font-black shadow-2xl active:scale-95 transition-transform">わかった！</button>
+        <div class="bg-white/20 rounded-full p-10 mb-8"><svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <h2 id="alarm-title" class="text-5xl lg:text-8xl font-black mb-8 tracking-tight">あと 10ふん！</h2>
+        <button onclick="closeAlarm()" id="btn-alarm-ok-box" class="bg-white text-orange-600 px-20 py-6 rounded-full text-3xl lg:text-6xl font-black shadow-2xl active:scale-95 transition-transform">わかった！</button>
     </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-8 py-4 rounded-full font-bold shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 z-[250] text-lg text-center"></div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-8 py-4 rounded-full font-bold shadow-2xl transition-all opacity-0 pointer-events-none transform translate-y-4 z-[250] text-base text-center"></div>
 
     <script>
         const DICT = {
@@ -307,10 +316,10 @@
 
         function applyTheme() {
             const config = THEMES[theme];
-            document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-4 lg:p-5 text-slate-800 transition-colors duration-300`;
-            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[2.5rem] flex flex-col items-center justify-center text-white border-b-4 border-blue-600/10 shadow-sm`;
-            document.getElementById('task-panel').className = `flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-5 lg:p-6 border`;
-            document.getElementById('label-title').className = `text-2xl lg:text-4xl font-black ${config.text} leading-none`;
+            document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-3 lg:p-5 text-slate-800 transition-colors duration-300`;
+            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white border-b-4 border-blue-600/10 shadow-sm transition-all overflow-hidden`;
+            document.getElementById('task-panel').className = `flex-[3] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-3 lg:p-8 border`;
+            document.getElementById('label-title').className = `text-xl lg:text-4xl font-black ${config.text} leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
             
             const toggle = document.getElementById('toggle-bg');
@@ -391,9 +400,9 @@
             } 
             else {
                 const totalSecs = Math.floor(diff / 1000); const h = Math.floor(totalSecs / 3600); const m = Math.ceil((totalSecs % 3600) / 60); 
-                let html = `<span class="text-[0.6em] mr-2 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
-                if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-1 font-black leading-none">${useKanji ? '時間':'じかん'}</span>`;
-                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-1 font-black leading-none">${useKanji ? '分':'ふん'}</span>`;
+                let html = `<span class="text-[0.6em] mr-1 lg:mr-2 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
+                if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-0.5 lg:mx-1 font-black leading-none">${useKanji ? '時間':'じかん'}</span>`;
+                html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 lg:mx-1 font-black leading-none">${useKanji ? '分':'ふん'}</span>`;
                 timerElement.innerHTML = html;
             }
         }
@@ -402,7 +411,14 @@
             const grid = document.getElementById('task-grid'); grid.innerHTML = '';
             const config = THEMES[theme];
             const rows = Math.ceil(tasks.length / 3);
-            grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            
+            // PC/タブレット時は1画面に収めるため等割、スマホ時は自然な高さ
+            const isMobile = window.innerWidth < 1024;
+            if (!isMobile) {
+                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            } else {
+                grid.style.gridTemplateRows = 'auto';
+            }
             
             tasks.forEach((task, index) => {
                 const card = document.createElement('div'); card.className = 'card-container'; card.setAttribute('data-index', index);
@@ -434,7 +450,7 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-2xl border ${earned ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-slate-50 border-slate-100'} h-auto aspect-square lg:aspect-auto justify-center min-w-0 transition-all flex-shrink`;
+                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-2xl border ${earned ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-slate-50 border-slate-100'} h-[85%] aspect-square lg:aspect-auto justify-center min-w-0 transition-all flex-shrink`;
                 div.innerHTML = `<span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-5xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
@@ -445,7 +461,7 @@
             const daysLabels = t('days'); const config = THEMES[theme];
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 const active = enabledDays[d]; const btn = document.createElement('button');
-                btn.className = `p-2 lg:p-3 rounded-xl text-lg font-black border-2 transition-all flex-1 min-w-[3rem] ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
+                btn.className = `p-1 lg:p-4 rounded-xl text-xs lg:text-lg font-black border-2 transition-all flex-1 min-w-[2rem] lg:min-w-[3.5rem] ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
                 btn.textContent = daysLabels[d]; btn.onclick = () => { enabledDays[d] = !enabledDays[d]; renderDayToggles(); renderStamps(); saveToStorage(); };
                 container.appendChild(btn);
             });
@@ -456,10 +472,10 @@
             const minLabel = t('alarm_min'); const undoneLabel = t('alarm_only_undone');
             [30, 20, 10, 5, 0].forEach(p => {
                 const active = alarmConfig[p]; const item = document.createElement('div');
-                item.className = `flex items-center justify-between px-6 py-4 rounded-2xl border-2 transition-all cursor-pointer ${active ? 'bg-white border-orange-300 shadow-sm' : 'bg-white border-slate-100 opacity-60'}`;
+                item.className = `flex items-center justify-between px-3 lg:px-6 py-2 lg:py-4 rounded-2xl border-2 transition-all cursor-pointer ${active ? 'bg-white border-orange-300 shadow-sm' : 'bg-white border-slate-100 opacity-60'}`;
                 item.onclick = () => { alarmConfig[p] = !alarmConfig[p]; renderAlarmSettings(); saveToStorage(); };
                 const label = p === 0 ? t('alarm_time') : `${p}${minLabel}`;
-                item.innerHTML = `<div class="flex flex-col"><span class="font-black text-lg ${active ? 'text-orange-600' : 'text-slate-400'}">${label}</span>${[30, 20, 10].includes(p) ? `<span class="text-xs text-slate-300 font-bold">${undoneLabel}</span>` : ''}</div><div class="text-2xl">${active ? '🔔' : '🔕'}</div>`;
+                item.innerHTML = `<div class="flex flex-col"><span class="font-black text-sm lg:text-lg ${active ? 'text-orange-600' : 'text-slate-400'}">${label}</span>${[30, 20, 10].includes(p) ? `<span class="text-[8px] lg:text-xs text-slate-300 font-bold">${undoneLabel}</span>` : ''}</div><div class="text-lg lg:text-2xl">${active ? '🔔' : '🔕'}</div>`;
                 list.appendChild(item);
             });
         }
