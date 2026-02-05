@@ -48,7 +48,6 @@
             justify-content: center;
             border-radius: 1rem;
             border-width: 2px;
-            /* 影を薄く自然に */
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
@@ -76,9 +75,6 @@
             50% { transform: scale(1.1); filter: brightness(1.3); }
         }
         .earned-stamp { animation: shine 2s infinite; }
-
-        /* 設定画面用のスクロール抑制 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-4 lg:p-5 text-slate-800 transition-colors duration-300">
@@ -153,13 +149,17 @@
 
     <!-- 設定画面 (1画面に収まるシンプルなレイアウト) -->
     <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-5xl rounded-[3rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-100">
+        <div class="bg-white w-full max-w-5xl rounded-[3rem] shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-slate-100">
             <!-- ヘッダー -->
             <div class="px-10 py-6 border-b flex justify-between items-center shrink-0">
                 <h3 id="label-settings-title" class="text-3xl font-black text-slate-800 tracking-tight">せってい</h3>
-                <button onclick="toggleSettings()" class="bg-slate-100 p-2 rounded-full hover:bg-slate-200 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <!-- 右上のボタンエリア -->
+                <div class="flex items-center gap-4">
+                    <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all">設定をおわる</button>
+                    <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
             </div>
             
             <!-- 設定項目エリア (2カラム) -->
@@ -168,57 +168,48 @@
                 <!-- 左セクション -->
                 <div class="space-y-10">
                     <section>
-                        <h4 id="label-display-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4">ひょうじ せってい</h4>
+                        <h4 id="label-display-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">ひょうじ せってい</h4>
                         <div class="flex items-center justify-between px-2">
-                            <span class="text-2xl font-black">かんじ (漢字)</span>
+                            <span class="text-xl font-black">かんじ (漢字)</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" id="kanji-toggle" onchange="toggleKanji()" class="sr-only peer">
-                                <div id="toggle-bg" class="w-16 h-8 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-7 after:transition-all"></div>
+                                <div id="toggle-bg" class="w-16 h-8 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border after:rounded-full after:h-6 after:w-7 after:transition-all"></div>
                             </label>
                         </div>
                     </section>
 
                     <section>
-                        <h4 id="label-theme-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4">テーマカラー</h4>
+                        <h4 id="label-theme-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">テーマカラー</h4>
                         <div class="grid grid-cols-4 gap-4 px-2">
-                            <button onclick="changeTheme('blue')" class="h-16 rounded-2xl bg-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('pink')" class="h-16 rounded-2xl bg-rose-400 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('green')" class="h-16 rounded-2xl bg-emerald-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
-                            <button onclick="changeTheme('orange')" class="h-16 rounded-2xl bg-orange-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('blue')" class="h-14 rounded-2xl bg-blue-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('pink')" class="h-14 rounded-2xl bg-rose-400 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('green')" class="h-14 rounded-2xl bg-emerald-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
+                            <button onclick="changeTheme('orange')" class="h-14 rounded-2xl bg-orange-500 border-4 border-white shadow-sm hover:scale-105 transition-transform"></button>
                         </div>
                     </section>
 
-                    <section class="flex flex-col items-center pt-2">
-                        <button onclick="testSound()" class="bg-slate-800 text-white px-12 py-4 rounded-full font-black text-lg shadow-xl active:scale-95 transition-all flex items-center gap-4">
-                            <span id="label-sound-test">🔊 おとをならしてみる</span>
-                        </button>
+                    <!-- しゅっぱつ じかん (左側に移動 & フォントサイズ縮小) -->
+                    <section>
+                        <h4 id="label-departure-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
+                        <div class="flex items-center justify-between px-2">
+                            <span class="text-xl font-black">じかん (時間)</span>
+                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="p-2 bg-slate-50 border-b-2 border-slate-200 text-xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
+                        </div>
                     </section>
                 </div>
 
                 <!-- 右セクション -->
                 <div class="space-y-10">
                     <section>
-                        <h4 id="label-departure-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4">しゅっぱつ じかん</h4>
-                        <div class="flex justify-center px-2">
-                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full p-2 bg-slate-50 border-b-4 border-slate-200 text-6xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all">
-                        </div>
-                    </section>
-
-                    <section>
-                        <h4 id="label-stamp-days" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4">スタンプをあつめる曜日</h4>
+                        <h4 id="label-stamp-days" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
                         <div id="day-toggle-list" class="flex flex-wrap gap-2 px-2"></div>
                     </section>
 
                     <section>
-                        <h4 id="label-alarm-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4">アラーム</h4>
+                        <h4 id="label-alarm-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">アラーム</h4>
                         <div id="alarm-list" class="grid grid-cols-2 gap-3 px-2"></div>
                     </section>
                 </div>
-            </div>
-
-            <!-- 下部ボタン -->
-            <div class="p-8 border-t flex justify-center shrink-0">
-                <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-24 py-4 rounded-full font-black text-2xl shadow-xl active:scale-95 transition-all">設定をおわる</button>
             </div>
         </div>
     </div>
@@ -249,8 +240,7 @@
                 title: "朝の準備", remaining: "出発まで", stamp_card: "週間スタンプ", reset: "やりなおす",
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
                 departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
-                sound_test: "🔊 音を鳴らしてみる", close_settings: "設定を終わる", done: "完了！",
-                celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
+                done: "完了！", celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間の準備をコンプリートしたよ！",
                 alarm_time: "出発！", alarm_min: "分前", alarm_only_undone: "※未完了時",
@@ -261,8 +251,7 @@
                 title: "あさのじゅんび", remaining: "しゅっぱつまで", stamp_card: "しゅうかんスタンプ", reset: "やりなおす",
                 settings: "せってい", display_setting: "ひょうじ せってい", theme_setting: "テーマカラー",
                 departure_setting: "しゅっぱつ じかん", stamp_days: "スタンプをあつめる曜日", alarm_setting: "アラーム",
-                sound_test: "🔊 おとをならしてみる", close_settings: "設定をおわる", done: "できた！",
-                celebration_done: "じゅんび かんりょう！", celebration_desc: "すごい！ぜんぶ できたね！",
+                done: "できた！", celebration_done: "じゅんび かんりょう！", celebration_desc: "すごい！ぜんぶ できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "きをつけて いってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間のじゅんびをコンプリートしたよ！",
                 alarm_time: "しゅっぱつ！", alarm_min: "ふんまえ", alarm_only_undone: "※まだのとき",
@@ -338,7 +327,7 @@
             document.getElementById('task-panel').className = `flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-5 lg:p-6 border`;
             document.getElementById('label-title').className = `text-2xl lg:text-4xl font-black ${config.text} leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
-            document.getElementById('close-settings-btn').className = `${config.primary} text-white px-24 py-4 rounded-full font-black text-2xl shadow-xl hover:brightness-110 active:scale-95 transition-all`;
+            document.getElementById('close-settings-btn').className = `${config.primary} text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all`;
             
             const toggle = document.getElementById('toggle-bg');
             if(toggle) toggle.style.backgroundColor = document.getElementById('kanji-toggle').checked ? config.primary.replace('bg-', '') : '';
@@ -355,7 +344,6 @@
             safeUpdate('label-departure-setting', t('departure_setting'));
             safeUpdate('label-stamp-days', t('stamp_days'));
             safeUpdate('label-alarm-setting', t('alarm_setting'));
-            safeUpdate('label-sound-test', t('sound_test'));
             safeUpdate('close-settings-btn', t('close_settings'));
             safeUpdate('btn-alarm-ok-box', useKanji ? "了解" : "わかった！");
             safeUpdate('btn-celebration-ok', useKanji ? "了解" : "はーい！");
@@ -533,10 +521,10 @@
             const config = THEMES[theme];
             if (isSettingsMode) {
                 overlay?.classList.remove('hidden');
-                if(btn) btn.className = `p-3 ${config.primary} text-white rounded-full transition-colors shadow-lg`;
+                if(btn) btn.className = `p-2 ${config.primary} text-white rounded-full transition-colors shadow-lg`;
             } else {
                 overlay?.classList.add('hidden');
-                if(btn) btn.className = `p-3 bg-gray-100 text-slate-400 rounded-full hover:bg-gray-200 transition-colors`;
+                if(btn) btn.className = `p-2 bg-gray-100 text-slate-400 rounded-full hover:bg-gray-200 transition-colors`;
             }
             renderTasks();
         }
