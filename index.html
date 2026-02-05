@@ -147,19 +147,16 @@
         </div>
     </div>
 
-    <!-- 設定画面 (1画面に収まるシンプルなレイアウト) -->
+    <!-- 設定画面 -->
     <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-5xl rounded-[3rem] shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-slate-100">
             <!-- ヘッダー -->
             <div class="px-10 py-6 border-b flex justify-between items-center shrink-0">
                 <h3 id="label-settings-title" class="text-3xl font-black text-slate-800 tracking-tight">せってい</h3>
-                <!-- 右上のボタンエリア -->
-                <div class="flex items-center gap-4">
-                    <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all">設定をおわる</button>
-                    <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                    </button>
-                </div>
+                <!-- 右上のボタンエリア：×ボタンのみに整理 -->
+                <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
             
             <!-- 設定項目エリア (2カラム) -->
@@ -188,12 +185,12 @@
                         </div>
                     </section>
 
-                    <!-- しゅっぱつ じかん (左側に移動 & フォントサイズ縮小) -->
                     <section>
                         <h4 id="label-departure-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
                         <div class="flex items-center justify-between px-2">
                             <span class="text-xl font-black">じかん (時間)</span>
-                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="p-2 bg-slate-50 border-b-2 border-slate-200 text-xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
+                            <!-- フォントサイズを大きくし、横幅を確保 -->
+                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-44 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
                         </div>
                     </section>
                 </div>
@@ -202,7 +199,8 @@
                 <div class="space-y-10">
                     <section>
                         <h4 id="label-stamp-days" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
-                        <div id="day-toggle-list" class="flex flex-wrap gap-2 px-2"></div>
+                        <!-- 7列固定のグリッドで折り返しを防止 -->
+                        <div id="day-toggle-list" class="grid grid-cols-7 gap-2 px-2"></div>
                     </section>
 
                     <section>
@@ -214,7 +212,7 @@
         </div>
     </div>
 
-    <!-- 各種オーバーレイ (お祝い・アラーム) -->
+    <!-- お祝いオーバーレイ -->
     <div id="celebration-overlay" class="fixed inset-0 z-[100] bg-[#fff0f3]/95 hidden flex flex-col items-center justify-center text-rose-600 p-6 text-center overflow-hidden">
         <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
         <div class="relative z-10 flex flex-col items-center">
@@ -226,6 +224,7 @@
         </div>
     </div>
 
+    <!-- アラームオーバーレイ -->
     <div id="alarm-overlay" class="fixed inset-0 z-[200] bg-orange-500 hidden flex flex-col items-center justify-center text-white p-10 text-center animate-pulse">
         <div class="bg-white/20 rounded-full p-10 mb-8"><svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
         <h2 id="alarm-title" class="text-6xl lg:text-9xl font-black mb-10 tracking-tight">あと 10ふん！</h2>
@@ -266,13 +265,6 @@
             green: { body: 'bg-emerald-50', primary: 'bg-emerald-500', primaryDark: 'bg-emerald-600', text: 'text-emerald-600', border: 'border-emerald-100', gradient: 'from-emerald-400 to-emerald-500' },
             orange: { body: 'bg-orange-50', primary: 'bg-orange-500', primaryDark: 'bg-orange-600', text: 'text-orange-600', border: 'border-orange-100', gradient: 'from-orange-400 to-orange-500' }
         };
-
-        const DEFAULT_TASKS = [
-            { id: 1, text: 'はみがき', completed: false }, { id: 2, text: 'あさごはん', completed: false },
-            { id: 3, text: 'トイレ', completed: false }, { id: 4, text: 'きがえ', completed: false },
-            { id: 5, text: 'くつした', completed: false }, { id: 6, text: 'ランドセル', completed: false },
-            { id: 7, text: 'かみのけ', completed: false }
-        ];
 
         let tasks = [];
         let departureTime = "08:00";
@@ -327,7 +319,6 @@
             document.getElementById('task-panel').className = `flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-5 lg:p-6 border`;
             document.getElementById('label-title').className = `text-2xl lg:text-4xl font-black ${config.text} leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
-            document.getElementById('close-settings-btn').className = `${config.primary} text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all`;
             
             const toggle = document.getElementById('toggle-bg');
             if(toggle) toggle.style.backgroundColor = document.getElementById('kanji-toggle').checked ? config.primary.replace('bg-', '') : '';
@@ -344,7 +335,6 @@
             safeUpdate('label-departure-setting', t('departure_setting'));
             safeUpdate('label-stamp-days', t('stamp_days'));
             safeUpdate('label-alarm-setting', t('alarm_setting'));
-            safeUpdate('close-settings-btn', t('close_settings'));
             safeUpdate('btn-alarm-ok-box', useKanji ? "了解" : "わかった！");
             safeUpdate('btn-celebration-ok', useKanji ? "了解" : "はーい！");
             const toggle = document.getElementById('kanji-toggle'); if(toggle) toggle.checked = useKanji;
@@ -399,7 +389,6 @@
         }
 
         function closeAlarm() { document.getElementById('alarm-overlay').classList.add('hidden'); window.speechSynthesis.cancel(); }
-        function testSound() { audioCtx.resume(); for(let i=0; i<3; i++) playBeep(880, 0.1, i * 0.2); speakText(useKanji ? "テスト成功！音が聞こえますか？" : "テストせいこう！おとがきこえるかな？"); }
 
         function updateCountdown(now) {
             const [depH, depM] = departureTime.split(':').map(Number); const target = new Date(now); target.setHours(depH, depM, 0, 0); if (target < now) target.setDate(target.getDate() + 1);
@@ -452,8 +441,8 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-2xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-slate-50 border-slate-100'} h-[85%] aspect-square lg:aspect-auto justify-center min-w-0 transition-all flex-shrink`;
-                div.innerHTML = `<span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-5xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
+                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-2xl border ${earned ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-slate-50 border-slate-100'} h-auto aspect-square lg:aspect-auto justify-center min-w-0 transition-all flex-shrink`;
+                div.innerHTML = `<span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-4xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
         }
@@ -463,7 +452,7 @@
             const daysLabels = t('days'); const config = THEMES[theme];
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 const active = enabledDays[d]; const btn = document.createElement('button');
-                btn.className = `p-2 lg:p-4 rounded-xl text-lg font-black border-2 transition-all ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
+                btn.className = `p-2 lg:p-3 rounded-xl text-lg font-black border-2 transition-all flex-1 min-w-[3rem] ${active ? (config.primary + ' text-white ' + config.primaryDark.replace('bg-','border-')) : 'bg-white text-slate-400 border-slate-100'}`;
                 btn.textContent = daysLabels[d]; btn.onclick = () => { enabledDays[d] = !enabledDays[d]; renderDayToggles(); renderStamps(); saveToStorage(); };
                 container.appendChild(btn);
             });
