@@ -153,10 +153,13 @@
             <!-- ヘッダー -->
             <div class="px-10 py-6 border-b flex justify-between items-center shrink-0">
                 <h3 id="label-settings-title" class="text-3xl font-black text-slate-800 tracking-tight">せってい</h3>
-                <!-- 右上のボタンエリア：×ボタンのみに整理 -->
-                <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <!-- 右上のボタンエリア：「設定をおわる」ボタンをこちらへ移動 -->
+                <div class="flex items-center gap-4">
+                    <button id="header-close-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all">設定をおわる</button>
+                    <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
             </div>
             
             <!-- 設定項目エリア (2カラム) -->
@@ -189,7 +192,6 @@
                         <h4 id="label-departure-setting" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
                         <div class="flex items-center justify-between px-2">
                             <span class="text-xl font-black">じかん (時間)</span>
-                            <!-- フォントサイズを大きくし、横幅を確保 -->
                             <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-44 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
                         </div>
                     </section>
@@ -199,7 +201,6 @@
                 <div class="space-y-10">
                     <section>
                         <h4 id="label-stamp-days" class="text-xl font-black mb-5 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
-                        <!-- 7列固定のグリッドで折り返しを防止 -->
                         <div id="day-toggle-list" class="grid grid-cols-7 gap-2 px-2"></div>
                     </section>
 
@@ -217,7 +218,8 @@
         <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
         <div class="relative z-10 flex flex-col items-center">
             <div id="celebration-title-box" class="bg-white rounded-[4rem] p-10 lg:p-20 shadow-2xl mb-10 border-b-[12px] border-rose-50 text-rose-600">
-                <h2 id="main-celebration-title" class="text-5xl lg:text-8xl font-black mb-8 tracking-tighter">じゅんび かんりょう！</h2>
+                <!-- whitespace-nowrap で折り返しを防止 -->
+                <h2 id="main-celebration-title" class="text-4xl lg:text-7xl font-black mb-8 tracking-tighter whitespace-nowrap">じゅんび かんりょう！</h2>
                 <p id="main-celebration-desc" class="text-2xl lg:text-4xl font-bold opacity-90 leading-relaxed">すごい！ぜんぶ できたね！</p>
             </div>
             <button id="btn-celebration-ok" onclick="closeCelebration()" class="bg-rose-500 text-white px-24 py-6 rounded-full text-4xl lg:text-6xl font-black shadow-2xl active:scale-95 transition-transform">はーい！</button>
@@ -265,6 +267,13 @@
             green: { body: 'bg-emerald-50', primary: 'bg-emerald-500', primaryDark: 'bg-emerald-600', text: 'text-emerald-600', border: 'border-emerald-100', gradient: 'from-emerald-400 to-emerald-500' },
             orange: { body: 'bg-orange-50', primary: 'bg-orange-500', primaryDark: 'bg-orange-600', text: 'text-orange-600', border: 'border-orange-100', gradient: 'from-orange-400 to-orange-500' }
         };
+
+        const DEFAULT_TASKS = [
+            { id: 1, text: 'はみがき', completed: false }, { id: 2, text: 'あさごはん', completed: false },
+            { id: 3, text: 'トイレ', completed: false }, { id: 4, text: 'きがえ', completed: false },
+            { id: 5, text: 'くつした', completed: false }, { id: 6, text: 'ランドセル', completed: false },
+            { id: 7, text: 'かみのけ', completed: false }
+        ];
 
         let tasks = [];
         let departureTime = "08:00";
@@ -322,6 +331,9 @@
             
             const toggle = document.getElementById('toggle-bg');
             if(toggle) toggle.style.backgroundColor = document.getElementById('kanji-toggle').checked ? config.primary.replace('bg-', '') : '';
+            
+            const headerCloseBtn = document.getElementById('header-close-btn');
+            if(headerCloseBtn) headerCloseBtn.className = `${config.primary} text-white px-8 py-2.5 rounded-full font-black text-lg shadow-md hover:brightness-110 active:scale-95 transition-all`;
         }
 
         function updateUIStrings() {
@@ -335,6 +347,7 @@
             safeUpdate('label-departure-setting', t('departure_setting'));
             safeUpdate('label-stamp-days', t('stamp_days'));
             safeUpdate('label-alarm-setting', t('alarm_setting'));
+            safeUpdate('header-close-btn', t('close_settings'));
             safeUpdate('btn-alarm-ok-box', useKanji ? "了解" : "わかった！");
             safeUpdate('btn-celebration-ok', useKanji ? "了解" : "はーい！");
             const toggle = document.getElementById('kanji-toggle'); if(toggle) toggle.checked = useKanji;
@@ -442,7 +455,7 @@
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
                 div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-2xl border ${earned ? 'bg-yellow-50 border-yellow-200 shadow-sm' : 'bg-slate-50 border-slate-100'} h-auto aspect-square lg:aspect-auto justify-center min-w-0 transition-all flex-shrink`;
-                div.innerHTML = `<span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-4xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
+                div.innerHTML = `<span class="text-[8px] lg:text-sm font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-5xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
         }
@@ -488,9 +501,33 @@
 
         function showCelebration(isPerfect, isOnTime) {
             const overlay = document.getElementById('celebration-overlay'); const title = document.getElementById('main-celebration-title'); const desc = document.getElementById('main-celebration-desc'); const box = document.getElementById('celebration-title-box');
-            if (isPerfect) { title.textContent = t('perfect_week'); desc.textContent = t('perfect_desc'); box.className = "bg-yellow-400 rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 text-white border-b-8 border-yellow-500"; speakText(useKanji ? "完璧です！パーフェクト達成！一週間の準備が完了しました！" : "すごい！パーフェクト達成！一週間のじゅんびをコンプリートしたよ！"); } 
-            else if (isOnTime) { title.textContent = t('celebration_done'); desc.textContent = t('celebration_desc'); box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; speakText(useKanji ? "準備完了です！すごいですね。ゆっくり過ごしてください。" : "じゅんび かんりょう！すごいね。ゆっくりすごしてね。"); }
-            else { title.textContent = t('go_out'); desc.textContent = t('go_out_desc'); box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; speakText(useKanji ? "いってらっしゃい！気をつけて行ってきてね！" : "いってらっしゃい！きをつけて いってきてね！"); }
+            
+            // 音声セリフの決定
+            let speechMsg = "";
+
+            if (isPerfect) { 
+                title.textContent = t('perfect_week'); 
+                desc.textContent = t('perfect_desc'); 
+                box.className = "bg-yellow-400 rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 text-white border-b-8 border-yellow-500"; 
+                speechMsg = useKanji ? "完璧です！パーフェクト達成！一週間の準備が完了しました！" : "すごい！パーフェクト達成！一週間のじゅんびをコンプリートしたよ！";
+            } 
+            else if (isOnTime) { 
+                title.textContent = t('celebration_done'); 
+                desc.textContent = t('celebration_desc'); 
+                box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; 
+                speechMsg = useKanji ? "準備完了です！すごいですね。ゆっくり過ごしてください。" : "じゅんび かんりょう！すごいね。ゆっくりすごしてね。";
+            }
+            else {
+                // 出発時間を過ぎている場合
+                title.textContent = t('go_out'); 
+                desc.textContent = t('go_out_desc'); 
+                box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; 
+                speechMsg = useKanji ? "いってらっしゃい！気をつけて行ってきてね！" : "いってらっしゃい！きをつけて いってきてね！";
+            }
+
+            // 音声を再生
+            speakText(speechMsg);
+
             const container = document.getElementById('confetti-container'); container.innerHTML = '';
             for (let i = 0; i < 60; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw'; c.style.backgroundColor = ['#f472b6', '#fb7185', '#fbbf24', '#60a5fa', '#a78bfa'][Math.floor(Math.random() * 5)]; c.style.animationDelay = Math.random() * 3 + 's'; c.style.width = '10px'; c.style.height = '10px'; container.appendChild(c); }
             overlay?.classList.remove('hidden');
