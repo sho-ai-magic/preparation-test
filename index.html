@@ -75,6 +75,15 @@
             50% { transform: scale(1.1); filter: brightness(1.3); }
         }
         .earned-stamp { animation: shine 2s infinite; }
+        
+        /* 長押し中のフィードバックアニメーション */
+        @keyframes hold-hint {
+            0% { transform: scale(1); }
+            100% { transform: scale(0.95); background-color: #f1f5f9; }
+        }
+        .is-holding {
+            animation: hold-hint 0.8s forwards;
+        }
     </style>
 </head>
 <body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-3 lg:p-5 text-slate-800 transition-colors duration-300">
@@ -85,7 +94,7 @@
         <!-- 上部(スマホ)/右側(PC): 時計・カウントダウン・スタンプ -->
         <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-2 lg:gap-5 shrink-0 order-1 lg:order-2 h-[20dvh] lg:h-full">
             <!-- 1. 時計 -->
-            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.2rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white shadow-sm border-b-4 border-blue-600/10">
+            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[1.2rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white shadow-sm border-b-4 border-blue-600/10 transition-all overflow-hidden">
                 <div id="digital-clock" class="text-3xl lg:text-8xl font-black tracking-tight leading-none">00:00</div>
                 <div id="digital-seconds" class="text-[10px] lg:text-3xl font-bold opacity-80 lg:mt-2 tabular-nums">00</div>
             </div>
@@ -103,7 +112,7 @@
             <!-- 3. スタンプカード -->
             <div id="stamp-card" class="flex-1 bg-white rounded-[1.2rem] lg:rounded-[2.5rem] p-1.5 lg:p-8 flex flex-col justify-center border border-slate-100 shadow-sm overflow-hidden">
                 <div class="flex justify-between items-center mb-0.5 lg:mb-4 px-1 lg:px-2 shrink-0">
-                    <span id="label-stamp" class="text-[8px] lg:text-lg font-black text-slate-400 uppercase tracking-wider">スタンプ</span>
+                    <span id="label-stamp" class="text-[8px] lg:text-lg font-black text-slate-400 uppercase tracking-wider">週間スタンプ</span>
                     <div class="flex items-center gap-0.5 text-yellow-500 font-black text-[8px] lg:text-2xl">
                         🏆 <span id="perfect-count" class="tabular-nums">0</span>
                     </div>
@@ -129,13 +138,13 @@
                 </button>
             </div>
 
-            <!-- タスクのグリッド (1画面に収まるよう配置) -->
+            <!-- タスクのグリッド -->
             <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
 
             <!-- 操作エリア -->
             <div class="mt-2 pt-2 border-t border-slate-50 flex justify-between items-center shrink-0">
                 <div id="add-task-form" class="flex gap-2 items-center">
-                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-28 lg:w-64 px-3 py-1.5 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none font-bold text-[10px] lg:text-base focus:border-blue-200">
+                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-28 lg:w-64 px-3 py-1.5 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none font-bold text-[10px] lg:text-base focus:border-blue-200 transition-all">
                     <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-1.5 rounded-xl active:scale-95 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="lg:w-5 lg:h-5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
@@ -189,7 +198,6 @@
                         <h4 id="label-departure-setting" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">しゅっぱつ じかん</h4>
                         <div class="flex items-center justify-between px-2">
                             <span class="text-xl font-black">じかん (時間)</span>
-                            <!-- フォントサイズを拡大し横幅を確保 -->
                             <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-48 lg:w-52 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
                         </div>
                     </section>
@@ -199,8 +207,7 @@
                 <div class="space-y-8">
                     <section>
                         <h4 id="label-stamp-days" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
-                        <!-- 日曜日が折り返さないよう7列のグリッドで固定 -->
-                        <div id="day-toggle-list" class="grid grid-cols-7 gap-1 lg:gap-2 px-1 lg:px-2"></div>
+                        <div id="day-toggle-list" class="grid grid-cols-7 gap-2 px-2"></div>
                     </section>
 
                     <section>
@@ -212,12 +219,26 @@
         </div>
     </div>
 
+    <!-- 削除確認モーダル -->
+    <div id="delete-modal" class="fixed inset-0 z-[250] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-[2rem] shadow-2xl p-8 flex flex-col items-center text-center">
+            <div class="bg-red-50 text-red-500 p-4 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>
+            </div>
+            <h3 class="text-xl font-black text-slate-800 mb-2" id="delete-msg-title">けしても いい？</h3>
+            <p class="text-slate-500 mb-8 font-bold" id="delete-msg-body">「<span id="delete-task-name"></span>」をリストからけすよ。</p>
+            <div class="flex gap-4 w-full">
+                <button onclick="closeDeleteModal()" class="flex-1 py-3 bg-slate-100 text-slate-600 rounded-2xl font-black active:scale-95 transition-all">やめる</button>
+                <button onclick="confirmDelete()" class="flex-1 py-3 bg-red-500 text-white rounded-2xl font-black active:scale-95 transition-all shadow-lg shadow-red-200">けす！</button>
+            </div>
+        </div>
+    </div>
+
     <!-- お祝いオーバーレイ -->
     <div id="celebration-overlay" class="fixed inset-0 z-[100] bg-[#fff0f3]/95 hidden flex flex-col items-center justify-center text-rose-600 p-6 text-center overflow-hidden">
         <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
         <div class="relative z-10 flex flex-col items-center">
-            <div id="celebration-title-box" class="bg-white rounded-[3rem] p-8 lg:p-16 shadow-2xl mb-8 border-b-[12px] border-rose-50 text-rose-600">
-                <!-- whitespace-nowrap で折り返しを防止 -->
+            <div id="celebration-title-box" class="bg-white rounded-[4rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-[12px] border-rose-50 text-rose-600">
                 <h2 id="main-celebration-title" class="text-4xl lg:text-8xl font-black mb-6 tracking-tighter whitespace-nowrap leading-none">じゅんび かんりょう！</h2>
                 <p id="main-celebration-desc" class="text-xl lg:text-3xl font-bold opacity-90 leading-relaxed">すごい！ぜんぶ できたね！</p>
             </div>
@@ -240,6 +261,7 @@
                 title: "朝の準備", remaining: "出発まで", stamp_card: "週間スタンプ", reset: "やりなおす",
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
                 departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
+                delete_confirm: "消してもいい？", delete_desc: "をリストから消します。",
                 done: "完了！", celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間の準備をコンプリートしたよ！",
@@ -251,6 +273,7 @@
                 title: "あさのじゅんび", remaining: "しゅっぱつまで", stamp_card: "しゅうかんスタンプ", reset: "やりなおす",
                 settings: "せってい", display_setting: "ひょうじ せってい", theme_setting: "テーマカラー",
                 departure_setting: "しゅっぱつ じかん", stamp_days: "スタンプをあつめる曜日", alarm_setting: "アラーム",
+                delete_confirm: "けしても いい？", delete_desc: "をリストからけすよ。",
                 done: "できた！", celebration_done: "じゅんび かんりょう！", celebration_desc: "すごい！ぜんぶ できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "きをつけて いってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間のじゅんびをコンプリートしたよ！",
@@ -287,6 +310,8 @@
         let perfectWeekCount = 0;
         let useKanji = false;
         let theme = 'blue';
+        let holdTaskId = null;
+        let holdTimer = null;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
@@ -305,10 +330,7 @@
             renderStamps();
             startClock();
             document.getElementById('new-task-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') addTask(); });
-            window.addEventListener('resize', () => {
-                renderTasks();
-                renderStamps();
-            });
+            window.addEventListener('resize', () => { renderTasks(); renderStamps(); });
         };
 
         function t(key) { return DICT[useKanji ? 'kanji' : 'kana'][key] || key; }
@@ -330,7 +352,6 @@
             document.getElementById('task-panel').className = `flex-1 lg:flex-[3] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-3 lg:p-8 border`;
             document.getElementById('label-title-main').className = `text-xl lg:text-4xl font-black ${config.text} leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
-            
             const toggle = document.getElementById('toggle-bg');
             if(toggle) toggle.style.backgroundColor = document.getElementById('kanji-toggle').checked ? config.primary.replace('bg-', '') : '';
         }
@@ -348,6 +369,7 @@
             safeUpdate('label-alarm-setting', t('alarm_setting'));
             safeUpdate('btn-alarm-ok-box', useKanji ? "了解" : "わかった！");
             safeUpdate('btn-celebration-ok', useKanji ? "了解" : "はーい！");
+            safeUpdate('delete-msg-title', t('delete_confirm'));
             const toggle = document.getElementById('kanji-toggle'); if(toggle) toggle.checked = useKanji;
             const depInput = document.getElementById('departure-input'); if(depInput) depInput.value = departureTime;
         }
@@ -420,26 +442,39 @@
             const grid = document.getElementById('task-grid'); grid.innerHTML = '';
             const config = THEMES[theme];
             const rows = Math.ceil(tasks.length / 3);
-            
-            // PC/タブレット時は1画面に収めるため等割、スマホ時はある程度高さを保つ
-            if (window.innerWidth >= 1024) {
-                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-            } else {
-                grid.style.gridTemplateRows = `repeat(${rows}, minmax(60px, 1fr))`;
-            }
+            if (window.innerWidth >= 1024) { grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`; } 
+            else { grid.style.gridTemplateRows = `repeat(${rows}, minmax(60px, 1fr))`; }
             
             tasks.forEach((task, index) => {
-                const card = document.createElement('div'); card.className = 'card-container'; card.setAttribute('data-index', index);
-                card.addEventListener('touchstart', (e) => { draggedItemIndex = index; e.currentTarget.classList.add('dragging'); }, {passive: true});
-                card.addEventListener('touchend', (e) => {
-                    e.currentTarget.classList.remove('dragging'); const touch = e.changedTouches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const targetCard = targetEl?.closest('.card-container');
-                    if (targetCard && draggedItemIndex !== null) { const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (draggedItemIndex !== targetIndex) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } } draggedItemIndex = null;
-                });
+                const card = document.createElement('div'); card.className = 'card-container'; card.setAttribute('data-id', task.id);
+                
+                // 長押しとクリックのイベントハンドラ
+                const startHold = (e) => {
+                    holdTimer = setTimeout(() => {
+                        showDeleteConfirm(task.id, task.text);
+                        holdTaskId = null;
+                    }, 800);
+                    holdTaskId = task.id;
+                    e.currentTarget.querySelector('.card-inner').classList.add('is-holding');
+                };
+                
+                const cancelHold = (e) => {
+                    clearTimeout(holdTimer);
+                    holdTaskId = null;
+                    e.currentTarget.querySelector('.card-inner').classList.remove('is-holding');
+                };
+
+                card.addEventListener('mousedown', startHold);
+                card.addEventListener('touchstart', startHold, {passive: true});
+                card.addEventListener('mouseup', cancelHold);
+                card.addEventListener('mouseleave', cancelHold);
+                card.addEventListener('touchend', cancelHold);
+                card.addEventListener('touchmove', cancelHold);
+
                 card.innerHTML = `
-                    <div class="card-inner ${task.completed ? 'is-flipped' : ''}" onclick="toggleTask(${task.id})">
+                    <div class="card-inner ${task.completed ? 'is-flipped' : ''}" onclick="if(!holdTaskId) toggleTask(${task.id})">
                         <div class="card-front bg-white ${config.border.replace('100','200')} ${config.text} border-2 transition-all">
                             <span class="text-[10px] lg:text-xl font-black px-1 text-center pointer-events-none break-all">${taskT(task.text)}</span>
-                            ${isSettingsMode ? `<button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 z-20"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : ''}
                         </div>
                         <div class="card-back bg-green-50 border-green-400 text-green-700 border-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="lg:w-8 lg:h-8 text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -450,6 +485,29 @@
                 grid.appendChild(card);
             });
             updateProgress();
+        }
+
+        // 削除確認
+        function showDeleteConfirm(id, name) {
+            holdTaskId = id;
+            document.getElementById('delete-task-name').textContent = taskT(name);
+            safeUpdate('delete-msg-body', t('delete_desc'));
+            document.getElementById('delete-modal').classList.remove('hidden');
+            audioCtx.resume();
+            playBeep(220, 0.2); // 低めの音で通知
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            holdTaskId = null;
+        }
+
+        function confirmDelete() {
+            if (holdTaskId) {
+                deleteTask(holdTaskId);
+                closeDeleteModal();
+                showToast(useKanji ? "消しました" : "けしたよ！");
+            }
         }
 
         function renderStamps() {
