@@ -15,7 +15,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード：Grid内で100%広がる */
+        /* 準備カード：比率を保ちつつGrid内で広がる */
         .card-container {
             perspective: 1000px;
             width: 100%;
@@ -48,8 +48,7 @@
             justify-content: center;
             border-radius: 1.25rem;
             border-width: 4px;
-            /* 違和感のある影を消し、ソフトな影に変更 */
-            box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.05);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
         .card-back {
@@ -76,9 +75,12 @@
             50% { transform: scale(1.1); filter: brightness(1.3); }
         }
         .earned-stamp { animation: shine 2s infinite; }
+
+        .settings-scroll::-webkit-scrollbar { width: 6px; }
+        .settings-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
-<body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-4 lg:p-6 text-slate-800">
+<body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-4 lg:p-6 text-slate-800 transition-colors duration-300">
 
     <div class="flex flex-col lg:flex-row h-full gap-4 lg:gap-6 overflow-hidden">
         
@@ -99,13 +101,13 @@
                 </button>
             </div>
 
-            <!-- タスクのグリッド (JSで行数を計算し、1画面に収める) -->
+            <!-- タスクのグリッド -->
             <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-3 lg:gap-4 overflow-hidden content-stretch"></div>
 
             <!-- 操作エリア -->
             <div class="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center shrink-0">
                 <div id="add-task-form" class="flex gap-2 items-center">
-                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-32 lg:w-48 px-3 py-1.5 border-2 border-slate-100 rounded-xl outline-none font-bold text-xs lg:text-sm focus:border-blue-200">
+                    <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-32 lg:w-48 px-3 py-1.5 border-2 border-slate-100 rounded-xl outline-none font-bold text-xs lg:text-sm focus:border-blue-200 transition-colors">
                     <button id="add-task-btn" onclick="addTask()" class="bg-blue-500 text-white p-1.5 rounded-xl active:scale-95 transition-all">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     </button>
@@ -117,11 +119,11 @@
             </div>
         </div>
 
-        <!-- 右側：時計・カウントダウン・スタンプカード (1/3ずつ均等) -->
+        <!-- 右側：時計・カウントダウン・スタンプカード -->
         <div class="w-full lg:w-1/3 flex flex-row lg:flex-col gap-3 lg:gap-6 shrink-0 order-1 lg:order-2 h-full min-h-0">
             
             <!-- 1. 時計 -->
-            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[2rem] shadow-sm flex flex-col items-center justify-center text-white border-b-8 border-blue-600/20">
+            <div id="clock-box" class="flex-1 bg-gradient-to-br from-blue-400 to-blue-500 rounded-[2rem] shadow-sm flex flex-col items-center justify-center text-white border-b-8 border-blue-600/20 transition-all">
                 <div id="digital-clock" class="text-4xl lg:text-7xl font-black tracking-tight leading-none drop-shadow-md">00:00</div>
                 <div id="digital-seconds" class="text-lg lg:text-2xl font-bold opacity-80 mt-1">00</div>
             </div>
@@ -136,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- 3. スタンプカード (縦に伸びないよう高さを制御) -->
+            <!-- 3. スタンプカード -->
             <div id="stamp-card" class="flex-1 bg-white rounded-[2rem] shadow-sm p-4 lg:p-6 flex flex-col justify-center border-t-8 lg:border-t-[10px] border-yellow-400 relative overflow-hidden min-w-0">
                 <div class="flex justify-between items-center mb-2 lg:mb-3 px-1 shrink-0">
                     <span id="label-stamp" class="text-xs lg:text-lg font-black text-slate-400 uppercase tracking-wider">週間スタンプ</span>
@@ -151,52 +153,81 @@
         </div>
     </div>
 
-    <!-- 設定画面 -->
+    <!-- 設定画面 (1画面に収まるよう2カラムレイアウトに拡張) -->
     <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border-b-8 border-slate-200">
+        <div class="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border-b-8 border-slate-200">
+            <!-- ヘッダー -->
             <div class="px-8 py-6 border-b flex justify-between items-center bg-slate-50 shrink-0">
                 <h3 id="label-settings-title" class="text-2xl font-black text-slate-700 tracking-tight">⚙️ せってい</h3>
                 <button onclick="toggleSettings()" class="bg-white p-2 rounded-full shadow-sm border hover:bg-gray-100 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-gray-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
-            <div class="flex-1 overflow-y-auto p-6 lg:p-8 space-y-6 font-bold">
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 flex items-center justify-between">
-                    <span class="text-xl font-black text-slate-700">かんじ (漢字)</span>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" id="kanji-toggle" onchange="toggleKanji()" class="sr-only peer">
-                        <div id="toggle-bg" class="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all"></div>
-                    </label>
-                </section>
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                    <div id="label-theme-setting" class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">テーマカラー</div>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button onclick="changeTheme('blue')" class="h-12 rounded-xl bg-blue-500 border-2 border-white text-white text-xs font-black">あお</button>
-                        <button onclick="changeTheme('pink')" class="h-12 rounded-xl bg-rose-400 border-2 border-white text-white text-xs font-black">もも</button>
-                        <button onclick="changeTheme('green')" class="h-12 rounded-xl bg-emerald-500 border-2 border-white text-white text-xs font-black">みどり</button>
-                        <button onclick="changeTheme('orange')" class="h-12 rounded-xl bg-orange-500 border-2 border-white text-white text-xs font-black">だいだい</button>
-                    </div>
-                </section>
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 text-center">
-                    <div id="label-departure-setting" class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">しゅっぱつ じかん</div>
-                    <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full max-w-[200px] p-3 bg-white border-2 border-slate-200 rounded-xl text-4xl font-black text-center text-blue-600 outline-none">
-                </section>
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100 text-center">
-                    <div id="label-stamp-days" class="text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">スタンプを集める曜日</div>
-                    <div id="day-toggle-list" class="flex flex-wrap justify-center gap-1"></div>
-                </section>
-                <section class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-100">
-                    <div id="label-alarm-setting" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">アラーム</div>
-                    <div id="alarm-list" class="grid grid-cols-2 lg:grid-cols-3 gap-2 text-xs"></div>
-                </section>
-                <div class="flex justify-center pt-2">
-                    <button id="sound-test-btn" onclick="testSound()" class="bg-slate-800 text-white px-10 py-3 rounded-full font-black text-lg active:scale-95 transition-transform flex items-center gap-2">
-                        <span id="label-sound-test">🔊 おとをならしてみる</span>
-                    </button>
+            
+            <!-- コンテンツエリア (Grid 2カラム) -->
+            <div class="flex-1 overflow-y-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 settings-scroll font-bold">
+                
+                <!-- 左側カラム -->
+                <div class="space-y-6">
+                    <!-- 表示設定 -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
+                        <div id="label-display-setting" class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">ひょうじ せってい</div>
+                        <div class="flex items-center justify-between px-2">
+                            <span class="text-lg font-black text-slate-700">かんじ (漢字)</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="kanji-toggle" onchange="toggleKanji()" class="sr-only peer">
+                                <div id="toggle-bg" class="w-14 h-7 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all"></div>
+                            </label>
+                        </div>
+                    </section>
+
+                    <!-- テーマカラー -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
+                        <div id="label-theme-setting" class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">テーマカラー</div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button onclick="changeTheme('blue')" class="h-14 rounded-2xl bg-blue-500 border-2 border-white shadow-sm text-white text-xs font-black hover:scale-105 transition-transform">あお</button>
+                            <button onclick="changeTheme('pink')" class="h-14 rounded-2xl bg-rose-400 border-2 border-white shadow-sm text-white text-xs font-black hover:scale-105 transition-transform">もも</button>
+                            <button onclick="changeTheme('green')" class="h-14 rounded-2xl bg-emerald-500 border-2 border-white shadow-sm text-white text-xs font-black hover:scale-105 transition-transform">みどり</button>
+                            <button onclick="changeTheme('orange')" class="h-14 rounded-2xl bg-orange-500 border-2 border-white shadow-sm text-white text-xs font-black hover:scale-105 transition-transform">だいだい</button>
+                        </div>
+                    </section>
+
+                    <!-- 音テスト -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100 flex flex-col items-center justify-center">
+                        <div id="label-sound-test-box" class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest text-center">おとの かくにん</div>
+                        <button id="sound-test-btn" onclick="testSound()" class="bg-slate-800 text-white px-8 py-3 rounded-full font-black text-sm active:scale-95 transition-transform flex items-center gap-2 shadow-lg">
+                            <span id="label-sound-test">🔊 おとをならしてみる</span>
+                        </button>
+                    </section>
+                </div>
+
+                <!-- 右側カラム -->
+                <div class="space-y-6">
+                    <!-- 出発時間 -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
+                        <div id="label-departure-setting" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">しゅっぱつ じかん</div>
+                        <div class="flex justify-center">
+                            <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-full max-w-[200px] p-3 bg-white border-2 border-slate-200 rounded-2xl text-4xl font-black text-center text-blue-600 outline-none shadow-sm">
+                        </div>
+                    </section>
+
+                    <!-- 曜日設定 -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
+                        <div id="label-stamp-days" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">スタンプをあつめる曜日</div>
+                        <div id="day-toggle-list" class="flex flex-wrap justify-center gap-1"></div>
+                    </section>
+
+                    <!-- アラーム -->
+                    <section class="bg-slate-50 p-5 rounded-3xl border-2 border-slate-100">
+                        <div id="label-alarm-setting" class="text-[10px] font-black text-slate-400 mb-2 text-center uppercase tracking-widest">アラーム (ベル)</div>
+                        <div id="alarm-list" class="grid grid-cols-2 gap-2 text-xs"></div>
+                    </section>
                 </div>
             </div>
+
+            <!-- フッター -->
             <div class="p-6 bg-slate-50 border-t flex justify-center shrink-0">
-                <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-16 py-3 rounded-full font-black text-xl active:scale-95">設定をおわる</button>
+                <button id="close-settings-btn" onclick="toggleSettings()" class="bg-blue-600 text-white px-16 py-3 rounded-full font-black text-xl shadow-lg active:scale-95 transition-all">設定をおわる</button>
             </div>
         </div>
     </div>
@@ -227,7 +258,7 @@
             kanji: {
                 title: "朝の準備", remaining: "出発まで", stamp_card: "週間スタンプ", reset: "やりなおす",
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
-                departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
+                departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "アラーム設定",
                 sound_test: "🔊 音を鳴らしてみる", close_settings: "設定を終わる", done: "完了！",
                 celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
@@ -313,11 +344,11 @@
         function applyTheme() {
             const config = THEMES[theme];
             document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-4 lg:p-6 text-slate-800 transition-colors duration-300`;
-            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[2rem] shadow-sm flex flex-col items-center justify-center text-white border-b-8 ${config.clockBorder}`;
-            document.getElementById('task-panel').className = `flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col border-b-[10px] ${config.border} p-4 lg:p-8`;
+            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[2rem] shadow-sm flex flex-col items-center justify-center text-white border-b-8 ${config.clockBorder} transition-all`;
+            document.getElementById('task-panel').className = `flex-[2] min-h-0 bg-white rounded-[2rem] shadow-sm flex flex-col border-b-[10px] ${config.border} p-4 lg:p-8 transition-all`;
             document.getElementById('label-title').className = `text-xl lg:text-4xl font-black ${config.text} lg:mb-2 leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
-            document.getElementById('close-settings-btn').className = `${config.primary} text-white px-16 py-3 rounded-full font-black text-xl shadow-lg active:scale-95 transition-all`;
+            document.getElementById('close-settings-btn').className = `${config.primary} text-white px-16 py-3 rounded-full font-black text-xl shadow-lg hover:brightness-110 active:scale-95 transition-all`;
             const toggle = document.getElementById('toggle-bg');
             if(toggle) toggle.style.backgroundColor = document.getElementById('kanji-toggle').checked ? config.primary.replace('bg-', '') : '';
         }
@@ -328,6 +359,7 @@
             safeUpdate('label-stamp', t('stamp_card'));
             safeUpdate('label-reset', t('reset'));
             safeUpdate('label-settings-title', t('settings'));
+            safeUpdate('label-display-setting', t('display_setting'));
             safeUpdate('label-theme-setting', t('theme_setting'));
             safeUpdate('label-departure-setting', t('departure_setting'));
             safeUpdate('label-stamp-days', t('stamp_days'));
@@ -393,7 +425,9 @@
         function updateCountdown(now) {
             const [depH, depM] = departureTime.split(':').map(Number); const target = new Date(now); target.setHours(depH, depM, 0, 0); if (target < now) target.setDate(target.getDate() + 1);
             const diff = target - now; const timerElement = document.getElementById('countdown-timer');
-            if (diff <= 0 || (target - now) < 1000) { timerElement.innerHTML = `<span class="text-red-500 animate-bounce">${t('alarm_time')}</span>`; } 
+            if (diff <= 0 || (target - now) < 1000) { 
+                timerElement.innerHTML = `<span class="text-red-500 animate-bounce">${t('alarm_time')}</span>`; 
+            } 
             else {
                 const totalSecs = Math.floor(diff / 1000); const h = Math.floor(totalSecs / 3600); const m = Math.ceil((totalSecs % 3600) / 60); 
                 let html = `<span class="text-[0.6em] mr-2 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
@@ -418,12 +452,12 @@
                 });
                 card.innerHTML = `
                     <div class="card-inner ${task.completed ? 'is-flipped' : ''}" onclick="toggleTask(${task.id})">
-                        <div class="card-front bg-white ${config.border} ${config.text} border-2">
+                        <div class="card-front bg-white ${config.border} ${config.text} border-2 transition-all">
                             <span class="text-sm lg:text-xl font-black px-1 text-center pointer-events-none break-all">${taskT(task.text)}</span>
                             ${isSettingsMode ? `<button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 z-20"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : ''}
                         </div>
                         <div class="card-back bg-green-100 border-green-400 text-green-700 border-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
                             <span class="text-[10px] lg:text-base font-black">${t('done')}</span>
                         </div>
                     </div>
@@ -439,8 +473,7 @@
             [1, 2, 3, 4, 5, 6, 0].forEach(d => {
                 if (!enabledDays[d]) return;
                 const earned = stamps[d]; const div = document.createElement('div');
-                // 縦長にならないよう、高さを抑えて横のバランスを取る
-                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'} h-[70%] justify-center min-w-0 transition-all flex-shrink`;
+                div.className = `flex-1 flex flex-col items-center p-1 lg:p-2 rounded-xl border ${earned ? 'bg-yellow-50 border-yellow-200' : 'bg-gray-50 border-gray-100'} h-auto aspect-square lg:aspect-video justify-center min-w-0 transition-all flex-shrink`;
                 div.innerHTML = `<span class="text-[8px] lg:text-xs font-black ${earned ? 'text-yellow-600' : 'text-gray-400'} mb-1">${daysLabels[d]}</span><span class="text-2xl lg:text-4xl ${earned ? 'earned-stamp' : 'opacity-10 grayscale'}">${earned ? '🌟' : '◯'}</span>`;
                 container.appendChild(div);
             });
@@ -462,7 +495,7 @@
             const minLabel = t('alarm_min'); const undoneLabel = t('alarm_only_undone');
             [30, 20, 10, 5, 0].forEach(p => {
                 const active = alarmConfig[p]; const item = document.createElement('div');
-                item.className = `flex items-center justify-between px-2 py-1 rounded-xl border-2 transition-all cursor-pointer ${active ? 'bg-white border-orange-300 shadow-sm' : 'bg-white border-slate-100 opacity-60'}`;
+                item.className = `flex items-center justify-between px-3 py-1 rounded-xl border-2 transition-all cursor-pointer ${active ? 'bg-white border-orange-300 shadow-sm' : 'bg-white border-slate-100 opacity-60'}`;
                 item.onclick = () => { alarmConfig[p] = !alarmConfig[p]; renderAlarmSettings(); saveToStorage(); };
                 const label = p === 0 ? t('alarm_time') : `${p}${minLabel}`;
                 item.innerHTML = `<div class="flex flex-col"><span class="font-black text-[10px] lg:text-xs ${active ? 'text-orange-600' : 'text-slate-400'}">${label}</span>${[30, 20, 10].includes(p) ? `<span class="text-[8px] text-slate-300 font-bold">${undoneLabel}</span>` : ''}</div><div class="text-sm lg:text-base">${active ? '🔔' : '🔕'}</div>`;
