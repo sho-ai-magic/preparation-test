@@ -15,7 +15,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード：枠内に収まるよう比率を調整 */
+        /* 準備カード：比率を保ちつつGrid内で広がる */
         .card-container {
             perspective: 1000px;
             width: 100%;
@@ -55,14 +55,10 @@
             transform: rotateY(180deg);
         }
 
-        /* 削除モード時のカード揺れアニメーション */
-        @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-1deg); }
-            75% { transform: rotate(1deg); }
-        }
-        .shake-card {
-            animation: shake 0.3s infinite;
+        .dragging {
+            opacity: 0.5;
+            scale: 0.95;
+            z-index: 50;
         }
 
         @keyframes confetti {
@@ -79,14 +75,11 @@
             50% { transform: scale(1.1); filter: brightness(1.3); }
         }
         .earned-stamp { animation: shine 2s infinite; }
-        
-        .settings-scroll::-webkit-scrollbar { width: 6px; }
-        .settings-scroll::-webkit-scrollbar-track { background: transparent; }
-        .settings-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body id="app-body" class="bg-blue-50 h-[100dvh] w-screen p-3 lg:p-5 text-slate-800 transition-colors duration-300">
 
+    <!-- メインレイアウト -->
     <div class="flex flex-col lg:flex-row h-full gap-3 lg:gap-5 overflow-hidden">
         
         <!-- 上部(スマホ)/右側(PC): 時計・カウントダウン・スタンプ -->
@@ -209,12 +202,9 @@
                             <input type="time" id="departure-input" value="08:00" onchange="updateDepartureTime()" class="w-48 lg:w-52 p-2 bg-slate-50 border-b-2 border-slate-200 text-3xl font-black text-center text-blue-600 outline-none tabular-nums focus:border-blue-400 transition-all rounded-lg">
                         </div>
                     </section>
-                </div>
 
-                <!-- 右セクション -->
-                <div class="space-y-8">
+                    <!-- タスク削除（整理）ボタンを左下に移動 -->
                     <section>
-                        <!-- タスク削除（整理）ボタンをここに追加 -->
                         <h4 id="label-manage-task" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">タスクの整理</h4>
                         <div class="px-2">
                             <button onclick="enterDeleteMode()" id="btn-edit-mode" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-lg shadow-sm hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
@@ -223,7 +213,10 @@
                             </button>
                         </div>
                     </section>
+                </div>
 
+                <!-- 右セクション -->
+                <div class="space-y-8">
                     <section>
                         <h4 id="label-stamp-days" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
                         <div id="day-toggle-list" class="grid grid-cols-7 gap-2 px-2"></div>
@@ -351,7 +344,7 @@
         function applyTheme() {
             const config = THEMES[theme];
             document.getElementById('app-body').className = `${config.body} h-[100dvh] w-screen p-3 lg:p-5 text-slate-800 transition-colors duration-300`;
-            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[1.5rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white border-b-4 border-blue-600/10 shadow-sm transition-all overflow-hidden`;
+            document.getElementById('clock-box').className = `flex-1 bg-gradient-to-br ${config.gradient} rounded-[1.2rem] lg:rounded-[2.5rem] flex flex-col items-center justify-center text-white shadow-sm border-b-4 border-blue-600/10 transition-all overflow-hidden`;
             document.getElementById('task-panel').className = `flex-1 lg:flex-[3] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-sm flex flex-col border-b-8 ${config.border.replace('100','200')} order-2 lg:order-1 overflow-hidden p-3 lg:p-8 border`;
             document.getElementById('label-title-main').className = `text-xl lg:text-4xl font-black ${config.text} leading-none`;
             document.getElementById('add-task-btn').className = `${config.primary} text-white p-2 rounded-xl transition-all active:scale-95`;
