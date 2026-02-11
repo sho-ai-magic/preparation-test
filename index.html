@@ -15,28 +15,55 @@
             transition: background-color 0.3s ease;
         }
 
+        /* 準備カード：比率を保ちつつGrid内で広がる */
         .card-container {
             perspective: 1000px;
             width: 100%;
+            height: 100%;
             user-select: none;
             touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
+            /* デフォルトの比率 */
+            aspect-ratio: 1.4 / 1;
         }
 
-        /* スマホ向け：高さを確保する設定 */
-        @media (max-width: 1023px) {
+        /* スマホ横向き用調整: 高さを抑えるために横長にし、フォントサイズ等を調整 */
+        /* PC/タブレットで誤作動しないよう max-width 制限を追加 */
+        @media (max-height: 500px) and (orientation: landscape) and (max-width: 1023px) {
             .card-container {
-                /* カードの比率を固定して潰れを防ぐ */
-                aspect-ratio: 1.5 / 1; 
-                min-height: 70px;
+                aspect-ratio: 2.5 / 1 !important; /* さらに横長に */
+            }
+            .card-text-main {
+                font-size: 0.8rem !important;
+                line-height: 1.1 !important;
+            }
+            .card-text-sub {
+                font-size: 0.6rem !important;
+            }
+            .card-icon {
+                width: 14px !important;
+                height: 14px !important;
+                margin-bottom: 0 !important;
+                margin-right: 4px !important;
+            }
+            /* 横向き時はアイコンとテキストを横並びっぽくする調整 */
+            .card-front, .card-back {
+                flex-direction: row !important;
+                padding: 0.25rem !important;
+                gap: 4px;
+            }
+            .card-front {
+                justify-content: center !important;
             }
         }
 
-        /* PC・タブレット向け：親グリッドに合わせて伸縮 */
-        @media (min-width: 1024px) {
-            .card-container {
-                height: 100%;
-            }
+        /* 整理モード時はカーソルを変更 */
+        .card-container.sortable {
+            touch-action: none;
+            cursor: grab;
+        }
+        .card-container.sortable:active {
+            cursor: grabbing;
         }
 
         .card-inner {
@@ -80,6 +107,16 @@
         }
         .dragging .card-inner {
             transition: none !important;
+        }
+
+        /* 削除モード時のカード揺れアニメーション */
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-0.5deg); }
+            75% { transform: rotate(0.5deg); }
+        }
+        .shake-card {
+            animation: shake 0.3s infinite;
         }
 
         @keyframes confetti {
@@ -154,7 +191,7 @@
             </div>
 
             <!-- タスクのグリッド -->
-            <div id="task-grid" class="flex-1 min-h-0 grid gap-2 lg:gap-4 overflow-hidden content-start pb-1"></div>
+            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
 
             <!-- 操作エリア -->
             <div class="mt-2 pt-2 border-t border-slate-50 shrink-0 min-h-[50px] flex items-center">
@@ -392,6 +429,7 @@
             safeUpdate('label-alarm-setting', t('alarm_setting'));
             safeUpdate('label-manage-task', t('manage_task'));
             
+            // 削除モードボタン
             const editBtn = document.getElementById('btn-edit-mode');
             if(editBtn) editBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -475,17 +513,18 @@
             const config = THEMES[theme];
             const rows = Math.ceil(tasks.length / 3);
             
-            // PC/タブレット横は1画面に収めるため等割、スマホ横向きは4列、それ以外は3列
-            if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
-                // スマホ横向き
-                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
-                grid.style.gridTemplateRows = "auto";
-            } else if (window.innerWidth >= 1024) {
-                // PC/タブレット
+            // PC/タブレット（大画面）
+            if (window.innerWidth >= 1024) {
                 grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
                 grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-            } else {
-                // スマホ縦
+            } 
+            // スマホ横向き (画面高さが500px以下)
+            else if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
+                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
+                grid.style.gridTemplateRows = "auto";
+            } 
+            // スマホ縦
+            else {
                 grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-y-auto content-start pb-1 settings-scroll";
                 grid.style.gridTemplateRows = "auto";
             }
