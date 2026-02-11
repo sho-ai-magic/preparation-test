@@ -15,24 +15,45 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード */
+        /* 準備カード：基本スタイル */
         .card-container {
             perspective: 1000px;
             width: 100%;
             height: 100%;
             user-select: none;
-            /* 通常時は縦スクロール許可 */
-            touch-action: pan-y;
-            -webkit-tap-highlight-color: transparent;
+            touch-action: none;
+            /* 通常のアスペクト比 */
+            aspect-ratio: 1.4 / 1;
         }
 
-        /* 編集モード時はスクロールを止めてドラッグ優先 */
-        .card-container.sortable {
-            touch-action: none;
-            cursor: grab;
-        }
-        .card-container.sortable:active {
-            cursor: grabbing;
+        /* スマホ横向き用：高さを抑えるために横長にし、文字サイズ等を調整 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .card-container {
+                aspect-ratio: 2.2 / 1 !important; /* より横長に */
+            }
+            /* グリッドを4列に強制変更 */
+            #task-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+                gap: 0.5rem !important;
+            }
+            /* フォントサイズ調整 */
+            .card-text-main {
+                font-size: 0.75rem !important; /* text-xs */
+            }
+            .card-text-sub {
+                font-size: 0.6rem !important;
+            }
+            .card-icon {
+                width: 16px !important;
+                height: 16px !important;
+            }
+            /* 上部バーをコンパクトに */
+            .header-area {
+                margin-bottom: 0.25rem !important;
+            }
+            .header-title {
+                font-size: 1rem !important;
+            }
         }
 
         .card-inner {
@@ -68,25 +89,10 @@
             transform: rotateY(180deg);
         }
 
-        /* ドラッグ中のスタイル */
         .dragging {
             opacity: 0.5;
-            scale: 1.05;
+            scale: 0.95;
             z-index: 50;
-            transition: none !important; /* ドラッグ中は追従性を良くするためtransitionを切る */
-        }
-        .dragging .card-inner {
-            transition: none !important;
-        }
-
-        /* 編集モード時のカード揺れアニメーション（削除ボタン強調） */
-        @keyframes shake {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-0.5deg); }
-            75% { transform: rotate(0.5deg); }
-        }
-        .shake-card {
-            animation: shake 0.3s infinite;
         }
 
         @keyframes confetti {
@@ -145,9 +151,9 @@
 
         <!-- 下部(スマホ)/左側(PC): あさのじゅんび -->
         <div id="task-panel" class="flex-1 lg:flex-[2.5] min-h-0 bg-white rounded-[1.5rem] lg:rounded-[2rem] shadow-sm flex flex-col order-2 lg:order-1 overflow-hidden p-3 lg:p-8 border border-slate-50 transition-colors">
-            <div class="flex justify-between items-center mb-2 lg:mb-4 shrink-0 px-1 lg:px-2">
+            <div class="header-area flex justify-between items-center mb-2 lg:mb-4 shrink-0 px-1 lg:px-2">
                 <div>
-                    <h1 id="label-title-main" class="text-lg lg:text-4xl font-black text-blue-600 leading-none">あさのじゅんび</h1>
+                    <h1 id="label-title-main" class="header-title text-lg lg:text-4xl font-black text-blue-600 leading-none">あさのじゅんび</h1>
                     <div class="flex items-center gap-2 lg:gap-4 mt-2">
                         <div class="w-24 lg:w-64 h-2 lg:h-5 bg-slate-100 rounded-full overflow-hidden border">
                             <div id="progress-bar" class="h-full bg-green-400 transition-all duration-500 ease-out" style="width: 0%"></div>
@@ -179,9 +185,9 @@
                     </button>
                 </div>
                 
-                <!-- 編集(整理)モード時の完了ボタン -->
-                <div id="edit-mode-controls" class="hidden w-full flex justify-center">
-                    <button onclick="exitEditMode()" id="finish-edit-btn" class="bg-blue-600 text-white px-8 py-2 rounded-full font-black text-sm lg:text-lg shadow-lg active:scale-95 transition-all w-full lg:w-auto">
+                <!-- 削除モード時の完了ボタン -->
+                <div id="delete-mode-controls" class="hidden w-full flex justify-center">
+                    <button onclick="exitDeleteMode()" id="finish-edit-btn" class="bg-blue-600 text-white px-8 py-2 rounded-full font-black text-sm lg:text-lg shadow-lg active:scale-95 transition-all w-full lg:w-auto">
                         編集完了
                     </button>
                 </div>
@@ -238,9 +244,9 @@
                     <section>
                         <h4 id="label-manage-task" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">タスクの整理</h4>
                         <div class="px-2">
-                            <button onclick="enterEditMode()" id="btn-edit-mode" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-lg shadow-sm hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
+                            <button onclick="enterDeleteMode()" id="btn-edit-mode" class="w-full py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-lg shadow-sm hover:bg-slate-200 transition-all flex items-center justify-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                                <span>タスクを整理する (削除・並び替え)</span>
+                                <span>タスクを整理する (削除)</span>
                             </button>
                         </div>
                     </section>
@@ -289,7 +295,7 @@
                 title: "朝の準備", remaining: "出発まで", stamp_card: "週間スタンプ", reset: "やりなおす",
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
                 departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
-                manage_task: "タスクの整理", edit_mode: "タスクの整理 (削除・並び替え)", finish_edit: "編集完了",
+                manage_task: "タスクの整理", edit_mode: "タスクの整理 (削除)", finish_edit: "編集完了",
                 delete_confirm: "消してもいい？", delete_desc: "をリストから消します。",
                 done: "完了！", celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
@@ -302,7 +308,7 @@
                 title: "あさのじゅんび", remaining: "しゅっぱつまで", stamp_card: "しゅうかんスタンプ", reset: "やりなおす",
                 settings: "せってい", display_setting: "ひょうじ せってい", theme_setting: "テーマカラー",
                 departure_setting: "しゅっぱつ じかん", stamp_days: "スタンプをあつめる曜日", alarm_setting: "アラーム",
-                manage_task: "タスクのせいり", edit_mode: "タスクをせいりする (さくじょ・ならびかえ)", finish_edit: "へんしゅう おわり",
+                manage_task: "タスクのせいり", edit_mode: "タスクをせいりする (さくじょ)", finish_edit: "へんしゅう おわり",
                 delete_confirm: "けしても いい？", delete_desc: "をリストからけすよ。",
                 done: "できた！", celebration_done: "じゅんび かんりょう！", celebration_desc: "すごい！ぜんぶ できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "きをつけて いってきてね！",
@@ -330,7 +336,7 @@
         let tasks = [];
         let departureTime = "08:00";
         let isSettingsMode = false;
-        let isEditMode = false;
+        let isDeleteMode = false;
         let lastDateString = new Date().toDateString(); 
         let alarmConfig = { 30: true, 20: true, 10: true, 5: true, 0: true };
         let lastAlarmTriggered = ""; 
@@ -399,6 +405,7 @@
             safeUpdate('label-alarm-setting', t('alarm_setting'));
             safeUpdate('label-manage-task', t('manage_task'));
             
+            // 削除モードボタン
             const editBtn = document.getElementById('btn-edit-mode');
             if(editBtn) editBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -481,38 +488,54 @@
             const grid = document.getElementById('task-grid'); grid.innerHTML = '';
             const config = THEMES[theme];
             const rows = Math.ceil(tasks.length / 3);
-            if (window.innerWidth >= 1024) { grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`; } 
-            else { grid.style.gridTemplateRows = `repeat(${rows}, minmax(60px, 1fr))`; }
+            
+            // PC/タブレット横は1画面に収めるため等割、スマホ横向きは4列、それ以外は3列
+            if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
+                // スマホ横向き
+                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-hidden content-stretch pb-1";
+                grid.style.gridTemplateRows = `repeat(${Math.ceil(tasks.length / 4)}, minmax(0, 1fr))`;
+            } else if (window.innerWidth >= 1024) {
+                // PC/タブレット
+                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
+                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            } else {
+                // スマホ縦
+                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
+                grid.style.gridTemplateRows = `repeat(${rows}, minmax(60px, 1fr))`;
+            }
             
             tasks.forEach((task, index) => {
-                const card = document.createElement('div'); card.className = `card-container ${isEditMode ? 'sortable' : ''}`; card.setAttribute('data-id', task.id);
+                const card = document.createElement('div'); card.className = 'card-container'; card.setAttribute('data-id', task.id);
                 card.setAttribute('data-index', index);
                 
-                if (isEditMode) {
+                // 削除モードでなければドラッグ有効
+                if (!isDeleteMode) {
                     card.setAttribute('draggable', 'true');
                     card.ondragstart = (e) => { e.dataTransfer.effectAllowed = 'move'; e.currentTarget.classList.add('dragging'); draggedItemIndex = index; };
                     card.ondragover = (e) => e.preventDefault();
                     card.ondrop = (e) => { e.preventDefault(); const targetCard = e.currentTarget; const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (draggedItemIndex !== null && draggedItemIndex !== targetIndex) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } };
                     card.ondragend = (e) => { e.currentTarget.classList.remove('dragging'); draggedItemIndex = null; };
                     
-                    card.addEventListener('touchstart', (e) => { draggedItemIndex = index; e.currentTarget.classList.add('dragging'); }, {passive: false});
-                    card.addEventListener('touchmove', (e) => {
-                        e.preventDefault(); 
-                        const touch = e.touches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const targetCard = targetEl?.closest('.card-container');
-                        if (targetCard && draggedItemIndex !== null) { const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (targetIndex !== draggedItemIndex && !isNaN(targetIndex)) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); draggedItemIndex = targetIndex; saveToStorage(); renderTasks(); } }
-                    }, {passive: false});
-                    card.addEventListener('touchend', (e) => { e.currentTarget.classList.remove('dragging'); draggedItemIndex = null; });
+                    card.addEventListener('touchstart', (e) => { draggedItemIndex = index; e.currentTarget.classList.add('dragging'); }, {passive: true});
+                    card.addEventListener('touchend', (e) => {
+                        e.currentTarget.classList.remove('dragging'); const touch = e.changedTouches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const targetCard = targetEl?.closest('.card-container');
+                        if (targetCard && draggedItemIndex !== null) { const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (draggedItemIndex !== targetIndex) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } } draggedItemIndex = null;
+                    });
                 }
 
                 card.innerHTML = `
-                    <div class="card-inner ${!isEditMode && task.completed ? 'is-flipped' : ''} ${isEditMode ? 'cursor-grab active:cursor-grabbing shake-card' : ''}" onclick="${isEditMode ? '' : `toggleTask(${task.id})`}">
+                    <div class="card-inner ${!isDeleteMode && task.completed ? 'is-flipped' : ''} ${isDeleteMode ? 'cursor-default shake-card' : ''}" onclick="${isDeleteMode ? '' : `toggleTask(${task.id})`}">
                         <div class="card-front bg-white ${config.border.replace('100','200')} ${config.text} border-2 transition-all relative">
-                            <span class="text-[10px] lg:text-xl font-black px-1 text-center pointer-events-none break-all">${taskT(task.text)}</span>
-                            ${isEditMode ? `<button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg z-20 hover:bg-red-600 transition-transform hover:scale-110 active:scale-95"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>` : ''}
+                            <span class="text-[10px] lg:text-xl font-black px-1 text-center pointer-events-none break-all card-text-main">${taskT(task.text)}</span>
+                            ${isDeleteMode ? `
+                                <button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg z-20 hover:bg-red-600 transition-transform hover:scale-110 active:scale-95">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
+                            ` : ''}
                         </div>
                         <div class="card-back bg-green-50 border-green-400 text-green-700 border-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="lg:w-8 lg:h-8 text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            <span class="text-[8px] lg:text-base font-black">${t('done')}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" class="lg:w-8 lg:h-8 card-icon text-green-500 mb-1"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span class="text-[8px] lg:text-base font-black card-text-sub">${t('done')}</span>
                         </div>
                     </div>
                 `;
@@ -521,15 +544,20 @@
             updateProgress();
         }
 
-        function enterEditMode() {
-            toggleSettings(); isEditMode = true;
-            document.getElementById('normal-controls').classList.add('hidden'); document.getElementById('edit-mode-controls').classList.remove('hidden');
-            renderTasks(); showToast(useKanji ? "整理モード：ドラッグで移動、×ボタンで削除" : "カードをうごかしたり、けしたりできるよ！");
+        // --- モード切替 ---
+        function enterDeleteMode() {
+            toggleSettings(); // 設定閉じる
+            isDeleteMode = true;
+            document.getElementById('normal-controls').classList.add('hidden');
+            document.getElementById('delete-mode-controls').classList.remove('hidden');
+            renderTasks();
+            showToast(useKanji ? "削除モード：カードの×ボタンで削除" : "カードのバツをおして けせるよ！");
         }
 
-        function exitEditMode() {
-            isEditMode = false;
-            document.getElementById('normal-controls').classList.remove('hidden'); document.getElementById('edit-mode-controls').classList.add('hidden');
+        function exitDeleteMode() {
+            isDeleteMode = false;
+            document.getElementById('normal-controls').classList.remove('hidden');
+            document.getElementById('delete-mode-controls').classList.add('hidden');
             renderTasks();
         }
 
@@ -573,7 +601,7 @@
             const completed = tasks.filter(t => t.completed).length; const total = tasks.length; const percent = total > 0 ? (completed / total) * 100 : 0;
             const bar = document.getElementById('progress-bar'); if(bar) bar.style.width = `${percent}%`; 
             safeUpdate('progress-text', `${completed} / ${total}`);
-            if (total > 0 && completed === total && !isSettingsMode && !celebrationShownToday && !isEditMode) { celebrationShownToday = true; handleCompletion(); }
+            if (total > 0 && completed === total && !isSettingsMode && !celebrationShownToday && !isDeleteMode) { celebrationShownToday = true; handleCompletion(); }
         }
 
         function handleCompletion() {
@@ -586,9 +614,25 @@
 
         function showCelebration(isPerfect, isOnTime) {
             const overlay = document.getElementById('celebration-overlay'); const title = document.getElementById('main-celebration-title'); const desc = document.getElementById('main-celebration-desc'); const box = document.getElementById('celebration-title-box');
-            if (isPerfect) { title.textContent = t('perfect_week'); desc.textContent = t('perfect_desc'); box.className = "bg-yellow-400 rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 text-white border-b-8 border-yellow-500"; speakText(useKanji ? "完璧です！パーフェクト達成！一週間の準備が完了しました！" : "すごい！パーフェクト達成！一週間のじゅんびをコンプリートしたよ！"); } 
-            else if (isOnTime) { title.textContent = t('celebration_done'); desc.textContent = t('celebration_desc'); box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; speakText(useKanji ? "準備完了です！すごいですね。ゆっくり過ごしてください。" : "じゅんび かんりょう！すごいね。ゆっくりすごしてね。"); }
-            else { title.textContent = t('go_out'); desc.textContent = t('go_out_desc'); box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; speakText(useKanji ? "いってらっしゃい！気をつけて行ってきてね！" : "いってらっしゃい！きをつけて いってきてね！"); }
+            
+            let speechMsg = "";
+            if (isPerfect) { 
+                title.textContent = t('perfect_week'); desc.textContent = t('perfect_desc'); 
+                box.className = "bg-yellow-400 rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 text-white border-b-8 border-yellow-500"; 
+                speechMsg = useKanji ? "完璧です！パーフェクト達成！一週間の準備が完了しました！" : "すごい！パーフェクト達成！一週間のじゅんびをコンプリートしたよ！";
+            } 
+            else if (isOnTime) { 
+                title.textContent = t('celebration_done'); desc.textContent = t('celebration_desc'); 
+                box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; 
+                speechMsg = useKanji ? "準備完了です！すごいですね。ゆっくり過ごしてください。" : "じゅんび かんりょう！すごいね。ゆっくりすごしてね。";
+            }
+            else {
+                title.textContent = t('go_out'); desc.textContent = t('go_out_desc'); 
+                box.className = "bg-white rounded-[3rem] p-10 lg:p-20 shadow-2xl mb-8 border-b-8 border-rose-50 text-rose-600"; 
+                speechMsg = useKanji ? "いってらっしゃい！気をつけて行ってきてね！" : "いってらっしゃい！きをつけて いってきてね！";
+            }
+
+            speakText(speechMsg);
             const container = document.getElementById('confetti-container'); container.innerHTML = '';
             for (let i = 0; i < 60; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + 'vw'; c.style.backgroundColor = ['#f472b6', '#fb7185', '#fbbf24', '#60a5fa', '#a78bfa'][Math.floor(Math.random() * 5)]; c.style.animationDelay = Math.random() * 3 + 's'; c.style.width = '10px'; c.style.height = '10px'; container.appendChild(c); }
             overlay?.classList.remove('hidden');
@@ -596,12 +640,16 @@
 
         function closeCelebration() { document.getElementById('celebration-overlay')?.classList.add('hidden'); }
         function toggleTask(id) { 
-            if (isEditMode) return;
             const task = tasks.find(t => t.id === id); 
             if (task) { task.completed = !task.completed; if (!task.completed) celebrationShownToday = false; audioCtx.resume(); playBeep(task.completed ? 1100 : 440, 0.05); renderTasks(); saveToStorage(); } 
         }
         function addTask() { const input = document.getElementById('new-task-input'); const text = input?.value.trim(); if (text) { tasks.push({ id: Date.now(), text, completed: false }); celebrationShownToday = false; if(input) input.value = ''; renderTasks(); saveToStorage(); } }
-        function deleteTask(id) { tasks = tasks.filter(t => t.id !== id); renderTasks(); saveToStorage(); showToast(useKanji ? "削除しました" : "けしたよ！"); }
+        function deleteTask(id) { 
+            tasks = tasks.filter(t => t.id !== id); 
+            renderTasks(); 
+            saveToStorage(); 
+            showToast(useKanji ? "削除しました" : "けしたよ！");
+        }
         function resetAll() { tasks = tasks.map(t => ({ ...t, completed: false })); renderTasks(); saveToStorage(); }
         function updateDepartureTime() { departureTime = document.getElementById('departure-input')?.value || departureTime; saveToStorage(); }
         
