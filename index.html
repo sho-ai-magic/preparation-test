@@ -30,19 +30,28 @@
         /* スマホ横向き用調整: 高さを抑えるために横長にし、フォントサイズ等を調整 */
         @media (max-height: 500px) and (orientation: landscape) {
             .card-container {
-                aspect-ratio: 2.2 / 1 !important;
+                aspect-ratio: 2.5 / 1 !important; /* さらに横長に */
             }
             .card-text-main {
-                font-size: 0.85rem !important; /* 文字サイズ縮小 */
+                font-size: 0.8rem !important;
                 line-height: 1.1 !important;
             }
             .card-text-sub {
                 font-size: 0.6rem !important;
             }
             .card-icon {
-                width: 16px !important;
-                height: 16px !important;
+                width: 14px !important;
+                height: 14px !important;
                 margin-bottom: 0 !important;
+                margin-right: 4px !important;
+            }
+            /* 横向き時はアイコンとテキストを横並びっぽくする調整 */
+            .card-front, .card-back {
+                flex-direction: row !important;
+                padding: 0.25rem !important;
+            }
+            .card-front {
+                justify-content: center !important;
             }
         }
 
@@ -490,7 +499,7 @@
             } 
             else {
                 const totalSecs = Math.floor(diff / 1000); const h = Math.floor(totalSecs / 3600); const m = Math.ceil((totalSecs % 3600) / 60); 
-                let html = `<span class="text-[0.6em] mr-1 lg:mr-2 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
+                let html = `<span class="text-[0.6em] mr-2 opacity-50 font-black uppercase tracking-widest leading-none">あと</span>`;
                 if (h > 0) html += `<span class="${THEMES[theme].text}">${h}</span><span class="text-[0.5em] mx-0.5 lg:mx-1 font-black leading-none">${useKanji ? '時間':'じかん'}</span>`;
                 html += `<span class="${THEMES[theme].text}">${m}</span><span class="text-[0.5em] mx-0.5 lg:mx-1 font-black leading-none">${useKanji ? '分':'ふん'}</span>`;
                 timerElement.innerHTML = html;
@@ -505,16 +514,16 @@
             // PC/タブレット横は1画面に収めるため等割、スマホ横向きは4列、それ以外は3列
             if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
                 // スマホ横向き
-                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-hidden content-stretch pb-1";
-                grid.style.gridTemplateRows = `repeat(${Math.ceil(tasks.length / 4)}, minmax(0, 1fr))`;
+                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
+                grid.style.gridTemplateRows = "auto";
             } else if (window.innerWidth >= 1024) {
                 // PC/タブレット
                 grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
                 grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
             } else {
                 // スマホ縦
-                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
-                grid.style.gridTemplateRows = `repeat(${rows}, minmax(60px, 1fr))`;
+                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-y-auto content-start pb-1 settings-scroll";
+                grid.style.gridTemplateRows = "auto";
             }
             
             tasks.forEach((task, index) => {
