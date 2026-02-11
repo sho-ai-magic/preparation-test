@@ -15,14 +15,13 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード */
+        /* 準備カード：比率を保ちつつGrid内で広がる */
         .card-container {
             perspective: 1000px;
             width: 100%;
             height: 100%;
             user-select: none;
             touch-action: none;
-            position: relative; /* 親要素の基準位置 */
         }
 
         .card-inner {
@@ -40,8 +39,8 @@
 
         .card-front, .card-back {
             position: absolute;
-            top: 0;  /* 位置ズレ防止のため明示的に指定 */
-            left: 0; /* 位置ズレ防止のため明示的に指定 */
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
@@ -62,6 +61,16 @@
             opacity: 0.5;
             scale: 0.95;
             z-index: 50;
+        }
+
+        /* 削除モード時のカード揺れアニメーション */
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-1deg); }
+            75% { transform: rotate(1deg); }
+        }
+        .shake-card {
+            animation: shake 0.3s infinite;
         }
 
         @keyframes confetti {
@@ -265,6 +274,7 @@
                 settings: "設定", display_setting: "表示設定", theme_setting: "テーマカラー",
                 departure_setting: "出発時間", stamp_days: "スタンプを集める曜日", alarm_setting: "通知設定",
                 manage_task: "タスクの整理", edit_mode: "タスクの整理 (削除)", finish_edit: "編集完了",
+                delete_confirm: "消してもいい？", delete_desc: "をリストから消します。",
                 done: "完了！", celebration_done: "準備完了！", celebration_desc: "すごい！全部できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "気をつけて行ってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間の準備をコンプリートしたよ！",
@@ -277,6 +287,7 @@
                 settings: "せってい", display_setting: "ひょうじ せってい", theme_setting: "テーマカラー",
                 departure_setting: "しゅっぱつ じかん", stamp_days: "スタンプをあつめる曜日", alarm_setting: "アラーム",
                 manage_task: "タスクのせいり", edit_mode: "タスクをせいりする (さくじょ)", finish_edit: "へんしゅう おわり",
+                delete_confirm: "けしても いい？", delete_desc: "をリストからけすよ。",
                 done: "できた！", celebration_done: "じゅんび かんりょう！", celebration_desc: "すごい！ぜんぶ できたね！",
                 go_out: "いってらっしゃい！", go_out_desc: "きをつけて いってきてね！",
                 perfect_week: "🏆 パーフェクト！ 🏆", perfect_desc: "すごい！一週間のじゅんびをコンプリートしたよ！",
@@ -372,7 +383,6 @@
             safeUpdate('label-alarm-setting', t('alarm_setting'));
             safeUpdate('label-manage-task', t('manage_task'));
             
-            // 削除モードボタン
             const editBtn = document.getElementById('btn-edit-mode');
             if(editBtn) editBtn.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
@@ -380,7 +390,6 @@
             `;
 
             safeUpdate('finish-edit-btn', t('finish_edit'));
-
             safeUpdate('btn-alarm-ok-box', useKanji ? "了解" : "わかった！");
             safeUpdate('btn-celebration-ok', useKanji ? "了解" : "はーい！");
             const toggle = document.getElementById('kanji-toggle'); if(toggle) toggle.checked = useKanji;
@@ -460,16 +469,6 @@
             
             tasks.forEach((task, index) => {
                 const card = document.createElement('div'); card.className = 'card-container'; card.setAttribute('data-id', task.id);
-                
-                // 削除モードでなければドラッグ有効
-                if (!isDeleteMode) {
-                    card.addEventListener('touchstart', (e) => { draggedItemIndex = index; e.currentTarget.classList.add('dragging'); }, {passive: true});
-                    card.addEventListener('touchend', (e) => {
-                        e.currentTarget.classList.remove('dragging'); const touch = e.changedTouches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const targetCard = targetEl?.closest('.card-container');
-                        if (targetCard && draggedItemIndex !== null) { const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (draggedItemIndex !== targetIndex) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } } draggedItemIndex = null;
-                    });
-                }
-
                 card.innerHTML = `
                     <div class="card-inner ${!isDeleteMode && task.completed ? 'is-flipped' : ''} ${isDeleteMode ? 'cursor-default shake-card' : ''}" onclick="${isDeleteMode ? '' : `toggleTask(${task.id})`}">
                         <div class="card-front bg-white ${config.border.replace('100','200')} ${config.text} border-2 transition-all relative">
@@ -491,25 +490,24 @@
             updateProgress();
         }
 
-        // --- モード切替 ---
         function enterDeleteMode() {
-            toggleSettings(); // 設定閉じる
+            toggleSettings(); 
             isDeleteMode = true;
-            document.getElementById('normal-controls').classList.add('hidden');
-            document.getElementById('delete-mode-controls').classList.remove('hidden');
+            const normal = document.getElementById('normal-controls');
+            const delMode = document.getElementById('delete-mode-controls');
+            if(normal) normal.classList.add('hidden');
+            if(delMode) delMode.classList.remove('hidden');
             renderTasks();
             showToast(useKanji ? "削除モード：カードの×ボタンで削除" : "カードのバツをおして けせるよ！");
         }
 
         function exitDeleteMode() {
             isDeleteMode = false;
-            document.getElementById('normal-controls').classList.remove('hidden');
-            document.getElementById('delete-mode-controls').classList.add('hidden');
+            const normal = document.getElementById('normal-controls');
+            const delMode = document.getElementById('delete-mode-controls');
+            if(normal) normal.classList.remove('hidden');
+            if(delMode) delMode.classList.add('hidden');
             renderTasks();
-        }
-
-        function confirmDelete() {
-            // 今回は使用しない
         }
 
         function renderStamps() {
