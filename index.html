@@ -15,11 +15,11 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード：比率を保ちつつGrid内で広がる */
+        /* 準備カード */
         .card-container {
             perspective: 1000px;
             width: 100%;
-            height: 100%;
+            height: 100%; /* 親グリッドいっぱいに広げる */
             user-select: none;
             touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
@@ -58,7 +58,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 1rem;
+            border-radius: 1rem; /* 少し丸みを抑える */
             border-width: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             padding: 0.25rem;
@@ -158,12 +158,12 @@
                 </button>
             </div>
 
-            <!-- タスクのグリッド -->
-            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
+            <!-- タスクのグリッド (overflow-hiddenでスクロール抑制、JSで高さ調整) -->
+            <div id="task-grid" class="flex-1 min-h-0 grid gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
 
             <!-- 操作エリア -->
-            <div class="mt-2 pt-2 border-t border-slate-50 shrink-0 min-h-[50px] flex items-center">
-                <!-- 通常モードの操作群 -->
+            <div class="mt-2 pt-2 border-t border-slate-50 shrink-0 min-h-[40px] lg:min-h-[50px] flex items-center">
+                <!-- 通常モード -->
                 <div id="normal-controls" class="flex justify-between items-center w-full">
                     <div id="add-task-form" class="flex gap-2 items-center">
                         <input type="text" id="new-task-input" placeholder="タスクをついか" class="w-28 lg:w-64 px-3 py-1.5 bg-slate-50 border-2 border-slate-100 rounded-xl outline-none font-bold text-[10px] lg:text-base focus:border-blue-200 transition-all">
@@ -177,7 +177,7 @@
                     </button>
                 </div>
                 
-                <!-- 削除モード時の完了ボタン -->
+                <!-- 削除モード -->
                 <div id="delete-mode-controls" class="hidden w-full flex justify-center">
                     <button onclick="exitDeleteMode()" id="finish-edit-btn" class="bg-blue-600 text-white px-8 py-2 rounded-full font-black text-sm lg:text-lg shadow-lg active:scale-95 transition-all w-full lg:w-auto">
                         編集完了
@@ -190,7 +190,6 @@
     <!-- 設定画面 -->
     <div id="settings-overlay" class="fixed inset-0 z-[150] bg-slate-900/60 backdrop-blur-md hidden flex items-center justify-center p-2 lg:p-4">
         <div class="bg-white w-full max-w-5xl rounded-[2.5rem] shadow-2xl flex flex-col max-h-[98vh] overflow-hidden border border-slate-100">
-            <!-- ヘッダー -->
             <div class="px-6 lg:px-10 py-4 lg:py-6 border-b flex justify-between items-center shrink-0">
                 <h3 id="label-settings-title" class="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight">せってい</h3>
                 <button onclick="toggleSettings()" class="bg-slate-100 p-2.5 rounded-full hover:bg-slate-200 transition-colors">
@@ -198,10 +197,8 @@
                 </button>
             </div>
             
-            <!-- 設定項目エリア -->
             <div class="flex-1 overflow-y-auto p-6 lg:p-10 grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 font-bold text-slate-700">
-                
-                <!-- 左セクション -->
+                <!-- 左 -->
                 <div class="space-y-8">
                     <section>
                         <h4 id="label-display-setting" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">ひょうじ せってい</h4>
@@ -232,7 +229,6 @@
                         </div>
                     </section>
 
-                    <!-- タスク削除（整理）ボタン -->
                     <section>
                         <h4 id="label-manage-task" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">タスクの整理</h4>
                         <div class="px-2">
@@ -243,8 +239,7 @@
                         </div>
                     </section>
                 </div>
-
-                <!-- 右セクション -->
+                <!-- 右 -->
                 <div class="space-y-8">
                     <section>
                         <h4 id="label-stamp-days" class="text-xl lg:text-2xl font-black mb-4 text-slate-400 uppercase tracking-widest border-l-8 border-blue-400 pl-4 leading-none">スタンプをあつめる曜日</h4>
@@ -423,38 +418,9 @@
                 try {
                     const parsed = JSON.parse(savedData);
                     const today = new Date().toDateString();
-                    const lastSave = new Date(parsed.saveDate);
-                    
-                    // 月曜日リセットロジック
-                    const now = new Date();
-                    // 今週の月曜日（0:00）を求める
-                    const currentMonday = new Date(now);
-                    const day = currentMonday.getDay(); // 0(日)-6(土)
-                    const diff = currentMonday.getDate() - day + (day === 0 ? -6 : 1);
-                    currentMonday.setDate(diff);
-                    currentMonday.setHours(0,0,0,0);
-
-                    // 最後に保存した日が、今週の月曜日より前ならスタンプリセット
-                    if (lastSave < currentMonday) {
-                        stamps = [false, false, false, false, false, false, false];
-                    } else {
-                        stamps = parsed.stamps || [false, false, false, false, false, false, false];
-                    }
-
-                    if (parsed.saveDate !== today) { 
-                        tasks = (parsed.tasks || DEFAULT_TASKS).map(t => ({ ...t, completed: false })); 
-                        celebrationShownToday = false; 
-                    } else { 
-                        tasks = parsed.tasks || DEFAULT_TASKS; 
-                        celebrationShownToday = parsed.celebrationShownToday || false; 
-                    }
-
-                    departureTime = parsed.departureTime || "08:00"; 
-                    alarmConfig = parsed.alarmConfig || alarmConfig; 
-                    enabledDays = parsed.enabledDays || enabledDays; 
-                    perfectWeekCount = parsed.perfectWeekCount || 0; 
-                    useKanji = parsed.useKanji || false; 
-                    theme = parsed.theme || 'blue';
+                    if (parsed.saveDate !== today) { tasks = (parsed.tasks || DEFAULT_TASKS).map(t => ({ ...t, completed: false })); celebrationShownToday = false; } 
+                    else { tasks = parsed.tasks || DEFAULT_TASKS; celebrationShownToday = parsed.celebrationShownToday || false; }
+                    departureTime = parsed.departureTime || "08:00"; alarmConfig = parsed.alarmConfig || alarmConfig; enabledDays = parsed.enabledDays || enabledDays; stamps = parsed.stamps || stamps; perfectWeekCount = parsed.perfectWeekCount || 0; useKanji = parsed.useKanji || false; theme = parsed.theme || 'blue';
                     safeUpdate('perfect-count', perfectWeekCount);
                 } catch (e) { tasks = DEFAULT_TASKS; }
             } else { tasks = DEFAULT_TASKS; }
@@ -508,23 +474,37 @@
         function renderTasks() {
             const grid = document.getElementById('task-grid'); grid.innerHTML = '';
             const config = THEMES[theme];
-            const rows = Math.ceil(tasks.length / 3);
+            const taskCount = tasks.length;
             
-            // PC/タブレット横は1画面に収めるため等割、スマホ横向きは4列、それ以外は3列
+            // 行数と列数の計算ロジック
+            let cols, rows;
+
+            // スマホ横向き (高さが500px以下で横長)
             if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
-                // スマホ横向き
-                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
-                grid.style.gridTemplateRows = "auto";
-            } else if (window.innerWidth >= 1024) {
-                // PC/タブレット
-                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
+                cols = 4;
+                rows = Math.ceil(taskCount / cols);
+                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
                 grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
-            } else {
-                // スマホ縦
-                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-y-auto content-start pb-1 settings-scroll";
-                grid.style.gridTemplateRows = "auto";
+            } 
+            // PC/タブレット（大画面）
+            else if (window.innerWidth >= 1024) {
+                cols = 3;
+                rows = Math.ceil(taskCount / cols);
+                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`; // 高さを均等割り
+            } 
+            // スマホ縦
+            else {
+                cols = 3;
+                rows = Math.ceil(taskCount / cols);
+                grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                // スマホ縦はスクロールさせるので、minmaxで高さを確保
+                grid.style.gridTemplateRows = `repeat(${rows}, minmax(70px, 1fr))`;
             }
             
+            // カードの文字サイズ調整 (数が多い場合は小さく)
+            const fontSizeClass = taskCount > 9 && window.innerWidth >= 1024 ? 'text-[10px] lg:text-sm' : 'text-[10px] lg:text-xl';
+
             tasks.forEach((task, index) => {
                 const card = document.createElement('div'); card.className = `card-container ${isDeleteMode ? 'sortable' : ''}`; card.setAttribute('data-id', task.id);
                 card.setAttribute('data-index', index);
@@ -581,7 +561,7 @@
                 card.innerHTML = `
                     <div class="card-inner ${!isDeleteMode && task.completed ? 'is-flipped' : ''} ${isDeleteMode ? 'cursor-default shake-card' : ''}" onclick="${isDeleteMode ? '' : `toggleTask(${task.id})`}">
                         <div class="card-front bg-white ${config.border.replace('100','200')} ${config.text} border-2 transition-all relative">
-                            <span class="text-[10px] lg:text-xl font-black px-1 text-center pointer-events-none break-all card-text-main">${taskT(task.text)}</span>
+                            <span class="${fontSizeClass} font-black px-1 text-center pointer-events-none break-all card-text-main">${taskT(task.text)}</span>
                             ${isDeleteMode ? `
                                 <button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg z-20 hover:bg-red-600 transition-transform hover:scale-110 active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -695,8 +675,6 @@
 
         function closeCelebration() { document.getElementById('celebration-overlay')?.classList.add('hidden'); }
         function toggleTask(id) { 
-            // 編集モード中は反応させない
-            if (isDeleteMode) return;
             const task = tasks.find(t => t.id === id); 
             if (task) { task.completed = !task.completed; if (!task.completed) celebrationShownToday = false; audioCtx.resume(); playBeep(task.completed ? 1100 : 440, 0.05); renderTasks(); saveToStorage(); } 
         }
