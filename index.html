@@ -15,11 +15,11 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 準備カード：比率を保ちつつGrid内で広がる */
+        /* 準備カード */
         .card-container {
             perspective: 1000px;
             width: 100%;
-            height: 100%;
+            height: 100%; /* 親グリッドいっぱいに広げる */
             user-select: none;
             touch-action: pan-y;
             -webkit-tap-highlight-color: transparent;
@@ -62,6 +62,19 @@
             border-width: 2px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             padding: 0.25rem;
+        }
+
+        /* スマホ横向き等の高さが狭い時用調整 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .card-front, .card-back {
+                flex-direction: row; /* 横並び */
+                gap: 4px;
+            }
+            .card-icon {
+                width: 16px !important;
+                height: 16px !important;
+                margin-bottom: 0 !important;
+            }
         }
 
         .card-back {
@@ -158,11 +171,11 @@
                 </button>
             </div>
 
-            <!-- タスクのグリッド -->
-            <div id="task-grid" class="flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
+            <!-- タスクのグリッド (スクロールせず1画面に収める) -->
+            <div id="task-grid" class="flex-1 min-h-0 grid gap-2 lg:gap-4 overflow-hidden content-stretch pb-1"></div>
 
             <!-- 操作エリア -->
-            <div class="mt-2 pt-2 border-t border-slate-50 shrink-0 min-h-[50px] flex items-center">
+            <div class="mt-2 pt-2 border-t border-slate-50 shrink-0 min-h-[40px] lg:min-h-[50px] flex items-center">
                 <!-- 通常モードの操作群 -->
                 <div id="normal-controls" class="flex justify-between items-center w-full">
                     <div id="add-task-form" class="flex gap-2 items-center">
@@ -423,38 +436,9 @@
                 try {
                     const parsed = JSON.parse(savedData);
                     const today = new Date().toDateString();
-                    const lastSave = new Date(parsed.saveDate);
-                    
-                    // 月曜日リセットロジック
-                    const now = new Date();
-                    // 今週の月曜日（0:00）を求める
-                    const currentMonday = new Date(now);
-                    const day = currentMonday.getDay(); // 0(日)-6(土)
-                    const diff = currentMonday.getDate() - day + (day === 0 ? -6 : 1);
-                    currentMonday.setDate(diff);
-                    currentMonday.setHours(0,0,0,0);
-
-                    // 最後に保存した日が、今週の月曜日より前ならスタンプリセット
-                    if (lastSave < currentMonday) {
-                        stamps = [false, false, false, false, false, false, false];
-                    } else {
-                        stamps = parsed.stamps || [false, false, false, false, false, false, false];
-                    }
-
-                    if (parsed.saveDate !== today) { 
-                        tasks = (parsed.tasks || DEFAULT_TASKS).map(t => ({ ...t, completed: false })); 
-                        celebrationShownToday = false; 
-                    } else { 
-                        tasks = parsed.tasks || DEFAULT_TASKS; 
-                        celebrationShownToday = parsed.celebrationShownToday || false; 
-                    }
-
-                    departureTime = parsed.departureTime || "08:00"; 
-                    alarmConfig = parsed.alarmConfig || alarmConfig; 
-                    enabledDays = parsed.enabledDays || enabledDays; 
-                    perfectWeekCount = parsed.perfectWeekCount || 0; 
-                    useKanji = parsed.useKanji || false; 
-                    theme = parsed.theme || 'blue';
+                    if (parsed.saveDate !== today) { tasks = (parsed.tasks || DEFAULT_TASKS).map(t => ({ ...t, completed: false })); celebrationShownToday = false; } 
+                    else { tasks = parsed.tasks || DEFAULT_TASKS; celebrationShownToday = parsed.celebrationShownToday || false; }
+                    departureTime = parsed.departureTime || "08:00"; alarmConfig = parsed.alarmConfig || alarmConfig; enabledDays = parsed.enabledDays || enabledDays; stamps = parsed.stamps || stamps; perfectWeekCount = parsed.perfectWeekCount || 0; useKanji = parsed.useKanji || false; theme = parsed.theme || 'blue';
                     safeUpdate('perfect-count', perfectWeekCount);
                 } catch (e) { tasks = DEFAULT_TASKS; }
             } else { tasks = DEFAULT_TASKS; }
@@ -510,78 +494,53 @@
             const config = THEMES[theme];
             const rows = Math.ceil(tasks.length / 3);
             
-            // PC/タブレット横は1画面に収めるため等割、スマホ横向きは4列、それ以外は3列
-            if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
-                // スマホ横向き
-                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
-                grid.style.gridTemplateRows = "auto";
-            } else if (window.innerWidth >= 1024) {
+            // PC/タブレットは1画面に収めるため等割、スマホは縦に伸ばして均等割
+            if (window.innerWidth >= 1024) {
                 // PC/タブレット
                 grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
                 grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            } else if (window.innerHeight <= 500 && window.innerWidth > window.innerHeight) {
+                 // スマホ横向き
+                grid.className = "flex-1 min-h-0 grid grid-cols-4 gap-2 overflow-y-auto content-start pb-1 settings-scroll";
+                grid.style.gridTemplateRows = `repeat(${Math.ceil(tasks.length / 4)}, minmax(0, 1fr))`;
             } else {
-                // スマホ縦
-                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-y-auto content-start pb-1 settings-scroll";
-                grid.style.gridTemplateRows = "auto";
+                // スマホ縦：スクロールさせないのではなく、「1画面に収まるように高さを縮める」
+                // ただし文字が小さくなりすぎないよう最低限の高さは確保したいが、要望優先で1画面収めを試みる
+                grid.className = "flex-1 min-h-0 grid grid-cols-3 gap-2 lg:gap-4 overflow-hidden content-stretch pb-1";
+                // 行数で割る
+                grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
             }
             
+            // スマホ縦・横で文字サイズをさらに調整
+            let fontSizeClass = 'text-[10px] lg:text-xl';
+            if (window.innerWidth < 1024) {
+                // タスク数が多い場合は文字を小さく
+                if (tasks.length > 9) fontSizeClass = 'text-[9px]';
+                else fontSizeClass = 'text-[10px]';
+            }
+
             tasks.forEach((task, index) => {
                 const card = document.createElement('div'); card.className = `card-container ${isDeleteMode ? 'sortable' : ''}`; card.setAttribute('data-id', task.id);
                 card.setAttribute('data-index', index);
                 
-                // 削除モード（isDeleteMode）のときだけドラッグ有効
                 if (isDeleteMode) {
                     card.setAttribute('draggable', 'true');
-                    
-                    card.ondragstart = (e) => {
-                        e.dataTransfer.effectAllowed = 'move';
-                        e.currentTarget.classList.add('dragging');
-                        draggedItemIndex = index;
-                    };
+                    card.ondragstart = (e) => { e.dataTransfer.effectAllowed = 'move'; e.currentTarget.classList.add('dragging'); draggedItemIndex = index; };
                     card.ondragover = (e) => e.preventDefault();
-                    card.ondrop = (e) => {
-                        e.preventDefault();
-                        const targetCard = e.currentTarget;
-                        const targetIndex = parseInt(targetCard.getAttribute('data-index'));
-                        if (draggedItemIndex !== null && draggedItemIndex !== targetIndex) {
-                            const item = tasks.splice(draggedItemIndex, 1)[0];
-                            tasks.splice(targetIndex, 0, item);
-                            saveToStorage(); renderTasks();
-                        }
-                    };
-                    card.ondragend = (e) => {
-                        e.currentTarget.classList.remove('dragging');
-                        draggedItemIndex = null;
-                    };
-
-                    card.addEventListener('touchstart', (e) => {
-                        draggedItemIndex = index;
-                        e.currentTarget.classList.add('dragging');
-                    }, {passive: true});
-
+                    card.ondrop = (e) => { e.preventDefault(); const targetCard = e.currentTarget; const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (draggedItemIndex !== null && draggedItemIndex !== targetIndex) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } };
+                    card.ondragend = (e) => { e.currentTarget.classList.remove('dragging'); draggedItemIndex = null; };
+                    
+                    card.addEventListener('touchstart', (e) => { draggedItemIndex = index; e.currentTarget.classList.add('dragging'); }, {passive: true});
                     card.addEventListener('touchend', (e) => {
-                        e.currentTarget.classList.remove('dragging');
-                        const touch = e.changedTouches[0];
-                        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-                        const targetCard = targetEl?.closest('.card-container');
-                        if (targetCard && draggedItemIndex !== null) {
-                            const targetIndex = parseInt(targetCard.getAttribute('data-index'));
-                            if (targetIndex !== draggedItemIndex && !isNaN(targetIndex)) {
-                                const item = tasks.splice(draggedItemIndex, 1)[0];
-                                tasks.splice(targetIndex, 0, item);
-                                draggedItemIndex = targetIndex; 
-                                saveToStorage(); 
-                                renderTasks();
-                            }
-                        }
-                        draggedItemIndex = null;
+                        e.currentTarget.classList.remove('dragging'); const touch = e.changedTouches[0]; const targetEl = document.elementFromPoint(touch.clientX, touch.clientY); const targetCard = targetEl?.closest('.card-container');
+                        if (targetCard && draggedItemIndex !== null) { const targetIndex = parseInt(targetCard.getAttribute('data-index')); if (targetIndex !== draggedItemIndex && !isNaN(targetIndex)) { const item = tasks.splice(draggedItemIndex, 1)[0]; tasks.splice(targetIndex, 0, item); saveToStorage(); renderTasks(); } } draggedItemIndex = null;
                     });
                 }
 
                 card.innerHTML = `
                     <div class="card-inner ${!isDeleteMode && task.completed ? 'is-flipped' : ''} ${isDeleteMode ? 'cursor-default shake-card' : ''}" onclick="${isDeleteMode ? '' : `toggleTask(${task.id})`}">
                         <div class="card-front bg-white ${config.border.replace('100','200')} ${config.text} border-2 transition-all relative">
-                            <span class="text-[10px] lg:text-xl font-black px-1 text-center pointer-events-none break-all card-text-main">${taskT(task.text)}</span>
+                            <span class="${fontSizeClass} font-black px-1 text-center pointer-events-none break-all card-text-main leading-tight">${taskT(task.text)}</span>
                             ${isDeleteMode ? `
                                 <button onclick="event.stopPropagation(); deleteTask(${task.id})" class="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-2 shadow-lg z-20 hover:bg-red-600 transition-transform hover:scale-110 active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -599,9 +558,8 @@
             updateProgress();
         }
 
-        // --- モード切替 ---
         function enterDeleteMode() {
-            toggleSettings(); // 設定閉じる
+            toggleSettings(); 
             isDeleteMode = true;
             document.getElementById('normal-controls').classList.add('hidden');
             document.getElementById('delete-mode-controls').classList.remove('hidden');
